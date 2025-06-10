@@ -17,8 +17,8 @@ public class Note {
     @Id
     private String id;
 
-    @Field("pat_id")
-    private Long patId;
+    @Field("patId")
+    private int patId;
 
     @Field("patient")
     private String patient;
@@ -26,10 +26,4 @@ public class Note {
     @Field("note")
     private String note;
 
-    // Constructeur pour création (sans ID)
-    public Note(Long patId, String patient, String note) {
-        this.patId = patId;
-        this.patient = patient;
-        this.note = note;
-    }
 }
