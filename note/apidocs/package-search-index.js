@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.medilabo.solution.note"},{"l":"com.medilabo.solution.note.model"},{"l":"com.medilabo.solution.note.repository"}];updateSearchResults();

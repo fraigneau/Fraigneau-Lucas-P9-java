@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"com.medilabo.solution.note.model","l":"Note"},{"p":"com.medilabo.solution.note","l":"NoteApplication"},{"p":"com.medilabo.solution.note.repository","l":"NoteRepository"}];updateSearchResults();
