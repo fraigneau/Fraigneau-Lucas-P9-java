@@ -1,9 +1,0 @@
-GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-patient,com.medilabo.solutions.patient,PatientApplication,5,3,0,0,2,1,1,1,1,1
-patient,com.medilabo.solutions.patient.controller,PatientController,53,3,0,0,13,1,5,1,5,1
-patient,com.medilabo.solutions.patient.exception,GlobalExceptionHandler.ErrorResponse,12,0,0,0,5,0,1,0,1,0
-patient,com.medilabo.solutions.patient.exception,GlobalExceptionHandler,19,7,0,0,5,2,1,2,1,2
-patient,com.medilabo.solutions.patient.exception,ResourceNotFoundException,4,0,0,0,2,0,1,0,1,0
-patient,com.medilabo.solutions.patient.service,PatientService,72,9,0,0,12,4,6,1,6,1
-patient,com.medilabo.solutions.patient.service,CrudService,25,0,0,0,5,0,5,0,5,0
-patient,com.medilabo.solutions.patient.mapper,PatientMapperImpl,76,3,4,0,22,1,4,1,2,1
