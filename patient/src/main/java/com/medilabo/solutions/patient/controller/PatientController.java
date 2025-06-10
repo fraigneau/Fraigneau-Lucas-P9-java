@@ -81,10 +81,12 @@ public class PatientController {
     }
 
     /**
-     * Supprime un patient
-     * 
-     * @param id L'identifiant du patient à supprimer
-     * @return Réponse vide avec statut 204 (No Content)
+     * Deletes a patient from the system by its ID.
+     *
+     * @param id the unique identifier of the patient to delete
+     * @return a ResponseEntity with HTTP status 204 (No Content) if deletion was
+     *         successful
+     * @throws ResourceNotFoundException if no patient exists with the given ID
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePatient(@PathVariable int id) {

@@ -6,6 +6,9 @@ import java.util.List;
  * Generic service interface for managing entities.
  *
  * @param <T> the type of the entity
+ * 
+ * @author Fraigneau Lucas
+ * @version 1.0
  */
 public interface CrudService<T> {
 

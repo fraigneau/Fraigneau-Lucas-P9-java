@@ -1,0 +1,123 @@
+name: Deploy Documentation to gh-pages
+
+on:
+  workflow_run:
+    workflows: ["Microservices Build & Test"]
+    types:
+      - completed
+    branches: [main, dev, feat/*]
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy-docs:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Create docs structure if not exists
+        run: |
+          mkdir -p patient/
+          mkdir -p note/
+          mkdir -p assessment/
+          mkdir -p gateway/
+
+      - name: Download artifacts from workflow run (patient)
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: patient-test-results
+          path: ./temp-patient-docs/
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Download artifacts from workflow run (note)
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: note-test-results
+          path: ./temp-note-docs/
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Download artifacts from workflow run (assessment)
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: assessment-test-results
+          path: ./temp-assessment-docs/
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Download artifacts from workflow run (gateway)
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: gateway-test-results
+          path: ./temp-gateway-docs/
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Deploy documentation
+        run: |
+          # Nettoyer les dossiers existants
+          rm -rf patient/*
+          rm -rf note/*
+          rm -rf assessment/*
+          rm -rf gateway/*
+
+          # Copier les nouveaux rapports
+          if [ -d "./temp-patient-docs" ]; then
+            cp -r ./temp-patient-docs/* patient/
+          fi
+
+          if [ -d "./temp-note-docs" ]; then
+            cp -r ./temp-note-docs/* note/
+          fi
+
+          if [ -d "./temp-assessment-docs" ]; then
+            cp -r ./temp-assessment-docs/* assessment/
+          fi
+
+          if [ -d "./temp-gateway-docs" ]; then
+            cp -r ./temp-gateway-docs/* gateway/
+          fi
+
+          # Nettoyer les fichiers temporaires
+          rm -rf ./temp-patient-docs
+          rm -rf ./temp-note-docs
+          rm -rf ./temp-assessment-docs
+          rm -rf ./temp-gateway-docs
+
+      - name: Commit and push to gh-pages
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          git add .
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "📚 Update documentation - $(date)"
+            git push origin gh-pages
+            echo "✅ Documentation deployed to GitHub Pages"
+          fi
