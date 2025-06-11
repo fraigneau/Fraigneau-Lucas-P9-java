@@ -105,8 +105,6 @@ jobs:
     continue-on-error: true
     outputs:
       start-time: ${{ steps.start-time.outputs.time }}
-      end-time: ${{ steps.end-time.outputs.time }}
-      duration: ${{ steps.duration.outputs.duration }}
       status: ${{ steps.build-status.outputs.status }}
     steps:
       - name: Record start time
