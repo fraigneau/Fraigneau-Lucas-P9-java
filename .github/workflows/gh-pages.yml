@@ -78,30 +78,26 @@ jobs:
 
       - name: Deploy documentation
         run: |
-          # Nettoyer les dossiers existants
-          rm -rf patient/*
-          rm -rf note/*
-          rm -rf assessment/*
-          rm -rf gateway/*
-
-          # Copier les nouveaux rapports
           if [ -d "./temp-patient-docs" ]; then
+            rm -rf patient/*
             cp -r ./temp-patient-docs/* patient/
           fi
 
           if [ -d "./temp-note-docs" ]; then
+            rm -rf note/*
             cp -r ./temp-note-docs/* note/
           fi
 
           if [ -d "./temp-assessment-docs" ]; then
+            rm -rf assessment/*
             cp -r ./temp-assessment-docs/* assessment/
           fi
 
           if [ -d "./temp-gateway-docs" ]; then
+            rm -rf gateway/*
             cp -r ./temp-gateway-docs/* gateway/
           fi
 
-          # Nettoyer les fichiers temporaires
           rm -rf ./temp-patient-docs
           rm -rf ./temp-note-docs
           rm -rf ./temp-assessment-docs
