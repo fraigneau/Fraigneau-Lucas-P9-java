@@ -1,9 +1,9 @@
-package com.medilabo.solution.note.mapper;
+package com.medilabo.solutions.note.mapper;
 
 import org.mapstruct.Mapper;
 
-import com.medilabo.solution.note.dto.NoteDto;
-import com.medilabo.solution.note.model.Note;
+import com.medilabo.solutions.note.dto.NoteDto;
+import com.medilabo.solutions.note.model.Note;
 
 @Mapper(componentModel = "spring")
 public interface NoteMapper {

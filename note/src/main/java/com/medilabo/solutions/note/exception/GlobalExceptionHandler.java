@@ -1,4 +1,4 @@
-package com.medilabo.solution.note.exception;
+package com.medilabo.solutions.note.exception;
 
 import java.sql.Timestamp;
 import java.util.List;

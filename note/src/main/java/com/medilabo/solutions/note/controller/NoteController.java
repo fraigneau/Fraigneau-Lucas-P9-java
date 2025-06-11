@@ -1,4 +1,4 @@
-package com.medilabo.solution.note.controller;
+package com.medilabo.solutions.note.controller;
 
 import java.util.List;
 
@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.medilabo.solution.note.dto.NoteDto;
-import com.medilabo.solution.note.service.NoteService;
+import com.medilabo.solutions.note.dto.NoteDto;
+import com.medilabo.solutions.note.service.NoteService;
 
 import jakarta.validation.Valid;
 

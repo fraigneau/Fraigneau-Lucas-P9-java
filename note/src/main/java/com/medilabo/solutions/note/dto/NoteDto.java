@@ -1,4 +1,4 @@
-package com.medilabo.solution.note.dto;
+package com.medilabo.solutions.note.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

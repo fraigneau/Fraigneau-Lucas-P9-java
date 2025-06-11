@@ -1,4 +1,4 @@
-package com.medilabo.solution.note.service;
+package com.medilabo.solutions.note.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,11 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.medilabo.solution.note.dto.NoteDto;
-import com.medilabo.solution.note.exception.ResourceNotFoundException;
-import com.medilabo.solution.note.mapper.NoteMapper;
-import com.medilabo.solution.note.model.Note;
-import com.medilabo.solution.note.repository.NoteRepository;
+import com.medilabo.solutions.note.dto.NoteDto;
+import com.medilabo.solutions.note.exception.ResourceNotFoundException;
+import com.medilabo.solutions.note.mapper.NoteMapper;
+import com.medilabo.solutions.note.model.Note;
+import com.medilabo.solutions.note.repository.NoteRepository;
 
 import lombok.RequiredArgsConstructor;
 
