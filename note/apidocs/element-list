@@ -1,8 +1,8 @@
-com.medilabo.solution.note
-com.medilabo.solution.note.controller
-com.medilabo.solution.note.dto
-com.medilabo.solution.note.exception
-com.medilabo.solution.note.mapper
-com.medilabo.solution.note.model
-com.medilabo.solution.note.repository
-com.medilabo.solution.note.service
+com.medilabo.solutions.note
+com.medilabo.solutions.note.controller
+com.medilabo.solutions.note.dto
+com.medilabo.solutions.note.exception
+com.medilabo.solutions.note.mapper
+com.medilabo.solutions.note.model
+com.medilabo.solutions.note.repository
+com.medilabo.solutions.note.service

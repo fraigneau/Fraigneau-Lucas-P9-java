@@ -1,0 +1,8 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+assessment,com.medilabo.solutions.assessment.service,AssessmentService,540,0,28,0,44,0,23,0,9,0
+assessment,com.medilabo.solutions.assessment.controller,AssessmentController,29,0,0,0,6,0,3,0,3,0
+assessment,com.medilabo.solutions.assessment.dto,PatientDto,299,0,56,0,8,0,47,0,19,0
+assessment,com.medilabo.solutions.assessment.dto,NoteDto,178,0,32,0,5,0,29,0,13,0
+assessment,com.medilabo.solutions.assessment.dto,DiabetesRiskLevelEnum,42,0,0,0,9,0,3,0,3,0
+assessment,com.medilabo.solutions.assessment.dto,Risk,180,0,32,0,5,0,29,0,13,0
+assessment,com.medilabo.solutions.assessment,AssessmentApplication,8,0,0,0,3,0,2,0,2,0

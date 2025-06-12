@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AssessmentService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">assessment</a> &gt; <a href="index.source.html" class="el_package">com.medilabo.solutions.assessment.service</a> &gt; <span class="el_source">AssessmentService.java</span></div><h1>AssessmentService.java</h1><pre class="source lang-java linenums">package com.medilabo.solutions.assessment.service;
+
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.medilabo.solutions.assessment.client.NoteServiceClient;
+import com.medilabo.solutions.assessment.client.PatientServiceClient;
+import com.medilabo.solutions.assessment.dto.DiabetesRiskLevelEnum;
+import com.medilabo.solutions.assessment.dto.NoteDto;
+import com.medilabo.solutions.assessment.dto.PatientDto;
+import com.medilabo.solutions.assessment.dto.Risk;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+<span class="nc" id="L19">@Slf4j</span>
+<span class="nc" id="L20">@RequiredArgsConstructor</span>
+@Service
+public class AssessmentService {
+
+    private final PatientServiceClient patientServiceClient;
+    private final NoteServiceClient noteServiceClient;
+
+    // TODO refaire la liste des termes déclencheurs
+<span class="nc" id="L28">    private static final List&lt;String&gt; TRIGGER_TERMS = List.of(</span>
+            &quot;Hémoglobine A1C&quot;, &quot;HbA1c&quot;, &quot;A1C&quot;, &quot;Hémoglobine glyquée&quot;,
+
+            &quot;Microalbumine&quot;, &quot;Micro-albumine&quot;, &quot;Microalbuminurie&quot;, &quot;Albuminurie&quot;,
+
+            &quot;Taille&quot;, &quot;Hauteur&quot;, &quot;Stature&quot;, &quot;Grandeur&quot;, &quot;Mesure corporelle&quot;,
+
+            &quot;Poids&quot;, &quot;Masse&quot;, &quot;Corpulent&quot;, &quot;Corpulente&quot;, &quot;Obèse&quot;, &quot;Obésité&quot;,
+            &quot;Maigre&quot;, &quot;Maigreur&quot;, &quot;Surpoids&quot;, &quot;IMC&quot;, &quot;BMI&quot;, &quot;Indice de masse&quot;,
+
+            &quot;Fumeur&quot;, &quot;Fumeuse&quot;, &quot;Fume&quot;, &quot;Fumé&quot;, &quot;Tabac&quot;, &quot;Cigarette&quot;,
+            &quot;Nicotine&quot;, &quot;Tabagique&quot;, &quot;Tabagisme&quot;, &quot;Tabacologie&quot;,
+
+            &quot;Anormal&quot;, &quot;Anormale&quot;, &quot;Anormalement&quot;, &quot;Anormalité&quot;, &quot;Pathologique&quot;,
+            &quot;Dysfonction&quot;, &quot;Trouble&quot;, &quot;Anomalie&quot;, &quot;Irrégulier&quot;, &quot;Irrégulière&quot;,
+
+            &quot;Cholestérol&quot;, &quot;Cholesterol&quot;, &quot;LDL&quot;, &quot;HDL&quot;, &quot;Lipide&quot;, &quot;Lipidique&quot;,
+            &quot;Triglycéride&quot;, &quot;Hypercholestérolémie&quot;, &quot;Dyslipidémie&quot;,
+
+            &quot;Vertige&quot;, &quot;Vertiges&quot;, &quot;Étourdissement&quot;, &quot;Étourdissements&quot;, &quot;Malaise&quot;,
+            &quot;Instabilité&quot;, &quot;Déséquilibre&quot;, &quot;Tournis&quot;,
+
+            &quot;Rechute&quot;, &quot;Récidive&quot;, &quot;Récidivant&quot;, &quot;Récurrence&quot;, &quot;Réapparition&quot;,
+            &quot;Retour&quot;, &quot;Rechuter&quot;, &quot;Récidiver&quot;,
+
+            &quot;Réaction&quot;, &quot;Réactivité&quot;, &quot;Réactif&quot;, &quot;Réactive&quot;, &quot;Allergie&quot;,
+            &quot;Allergique&quot;, &quot;Intolérance&quot;, &quot;Sensibilité&quot;, &quot;Hypersensibilité&quot;,
+
+            &quot;Anticorps&quot;, &quot;Immunoglobuline&quot;, &quot;IgG&quot;, &quot;IgM&quot;, &quot;IgA&quot;, &quot;IgE&quot;,
+            &quot;Immunité&quot;, &quot;Défense immunitaire&quot;, &quot;Système immunitaire&quot;);
+
+    public Risk createAssessment(int patId) {
+<span class="nc" id="L60">        log.info(&quot;Creating assessment for patient ID: {}&quot;, patId);</span>
+
+<span class="nc" id="L62">        PatientDto patientDto = patientServiceClient.getPatientById(Long.valueOf(patId));</span>
+<span class="nc" id="L63">        List&lt;NoteDto&gt; notes = noteServiceClient.getNoteByPatientId(patId);</span>
+
+<span class="nc" id="L65">        Risk risk = new Risk();</span>
+<span class="nc" id="L66">        risk.setPatientId(patId);</span>
+<span class="nc" id="L67">        risk.setBirthDate(patientDto.getBirthDate());</span>
+<span class="nc" id="L68">        risk.setGender(patientDto.getGender());</span>
+<span class="nc" id="L69">        risk.setNotes(notes.stream().map(NoteDto::getNote).toList());</span>
+
+<span class="nc" id="L71">        return risk;</span>
+    }
+
+    public DiabetesRiskLevelEnum assessDiabetesRisk(Risk risk) {
+<span class="nc" id="L75">        int age = calculateAge(risk.getBirthDate());</span>
+<span class="nc" id="L76">        boolean isMale = &quot;M&quot;.equals(risk.getGender());</span>
+<span class="nc" id="L77">        int triggerCount = countTriggerTerms(risk.getNotes());</span>
+
+<span class="nc" id="L79">        DiabetesRiskLevelEnum riskLevel = calculateRiskLevel(age, isMale, triggerCount);</span>
+
+<span class="nc" id="L81">        log.info(&quot;Assessment completed - Age: {}, Gender: {}, Triggers: {}, Risk: {}&quot;,</span>
+<span class="nc" id="L82">                age, risk.getGender(), triggerCount, riskLevel);</span>
+
+<span class="nc" id="L84">        return riskLevel;</span>
+    }
+
+    private int calculateAge(LocalDate birthDate) {
+<span class="nc" id="L88">        return Period.between(birthDate, LocalDate.now()).getYears();</span>
+    }
+
+    private int countTriggerTerms(List&lt;String&gt; notes) {
+<span class="nc" id="L92">        return (int) notes.stream()</span>
+<span class="nc" id="L93">                .flatMap(note -&gt; TRIGGER_TERMS.stream()</span>
+<span class="nc" id="L94">                        .filter(term -&gt; note.toLowerCase().contains(term.toLowerCase())))</span>
+<span class="nc" id="L95">                .distinct()</span>
+<span class="nc" id="L96">                .count();</span>
+    }
+
+    private DiabetesRiskLevelEnum calculateRiskLevel(int age, boolean isMale, int triggerCount) {
+<span class="nc bnc" id="L100" title="All 2 branches missed.">        if (triggerCount == 0) {</span>
+<span class="nc" id="L101">            return DiabetesRiskLevelEnum.NONE;</span>
+        }
+
+<span class="nc bnc" id="L104" title="All 2 branches missed.">        if (age &gt; 30) {</span>
+<span class="nc bnc" id="L105" title="All 4 branches missed.">            if (triggerCount &gt;= 2 &amp;&amp; triggerCount &lt;= 5) {</span>
+<span class="nc" id="L106">                return DiabetesRiskLevelEnum.BORDERLINE;</span>
+<span class="nc bnc" id="L107" title="All 4 branches missed.">            } else if (triggerCount &gt;= 6 &amp;&amp; triggerCount &lt;= 7) {</span>
+<span class="nc" id="L108">                return DiabetesRiskLevelEnum.IN_DANGER;</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">            } else if (triggerCount &gt;= 8) {</span>
+<span class="nc" id="L110">                return DiabetesRiskLevelEnum.EARLY_ONSET;</span>
+            }
+        } else {
+<span class="nc bnc" id="L113" title="All 2 branches missed.">            if (isMale) {</span>
+<span class="nc bnc" id="L114" title="All 4 branches missed.">                if (triggerCount &gt;= 3 &amp;&amp; triggerCount &lt;= 4) {</span>
+<span class="nc" id="L115">                    return DiabetesRiskLevelEnum.IN_DANGER;</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">                } else if (triggerCount &gt;= 5) {</span>
+<span class="nc" id="L117">                    return DiabetesRiskLevelEnum.EARLY_ONSET;</span>
+                }
+            } else {
+<span class="nc bnc" id="L120" title="All 4 branches missed.">                if (triggerCount &gt;= 4 &amp;&amp; triggerCount &lt;= 6) {</span>
+<span class="nc" id="L121">                    return DiabetesRiskLevelEnum.IN_DANGER;</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">                } else if (triggerCount &gt;= 7) {</span>
+<span class="nc" id="L123">                    return DiabetesRiskLevelEnum.EARLY_ONSET;</span>
+                }
+            }
+        }
+
+<span class="nc" id="L128">        return DiabetesRiskLevelEnum.NONE;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

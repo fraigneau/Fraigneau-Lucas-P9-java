@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.medilabo.solutions.assessment"},{"l":"com.medilabo.solutions.assessment.client"},{"l":"com.medilabo.solutions.assessment.controller"},{"l":"com.medilabo.solutions.assessment.dto"},{"l":"com.medilabo.solutions.assessment.service"}];updateSearchResults();

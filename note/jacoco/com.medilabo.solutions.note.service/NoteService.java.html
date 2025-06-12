@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NoteService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">note</a> &gt; <a href="index.source.html" class="el_package">com.medilabo.solutions.note.service</a> &gt; <span class="el_source">NoteService.java</span></div><h1>NoteService.java</h1><pre class="source lang-java linenums">package com.medilabo.solutions.note.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import com.medilabo.solutions.note.dto.NoteDto;
+import com.medilabo.solutions.note.exception.ResourceNotFoundException;
+import com.medilabo.solutions.note.mapper.NoteMapper;
+import com.medilabo.solutions.note.model.Note;
+import com.medilabo.solutions.note.repository.NoteRepository;
+
+import lombok.RequiredArgsConstructor;
+
+/**
+ * Service class for managing patient medical notes.
+ * This service provides functionality for retrieving, creating, and deleting
+ * notes associated with patients.
+ * 
+ * @author Fraigneau Lucas
+ * @version 1.0
+ */
+@Service
+@RequiredArgsConstructor
+public class NoteService {
+
+    private final NoteRepository noteRepository;
+    private final NoteMapper noteMapper;
+<span class="nc" id="L32">    private static final Logger log = LoggerFactory.getLogger(NoteService.class);</span>
+
+    /**
+     * Retrieves all notes associated with a specific patient.
+     * 
+     * @param patientId The unique identifier of the patient whose notes are to be
+     *                  retrieved
+     * @return A list of NoteDto objects representing the patient's notes
+     */
+    public List&lt;NoteDto&gt; getNotesByPatientId(int patientId) {
+<span class="nc" id="L42">        log.debug(&quot;Retrieving notes for patient with ID: &quot; + patientId);</span>
+<span class="nc" id="L43">        List&lt;Note&gt; notes = noteRepository.findByPatId((Integer) patientId);</span>
+<span class="nc" id="L44">        List&lt;NoteDto&gt; noteDtos = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        for (Note note : notes) {</span>
+<span class="nc" id="L46">            NoteDto noteDto = noteMapper.toDto(note);</span>
+<span class="nc" id="L47">            noteDtos.add(noteDto);</span>
+<span class="nc" id="L48">        }</span>
+<span class="nc" id="L49">        return noteDtos;</span>
+    }
+
+    /**
+     * Creates a new Note entry using the provided DTO.
+     * &lt;p&gt;
+     * This method converts the NoteDto to a Note entity, saves it to the database,
+     * and returns the newly created note as a DTO.
+     * 
+     * @param noteDto the Data Transfer Object containing the note information to be
+     *                saved
+     * @return the Data Transfer Object representing the newly created note with
+     *         generated ID
+     */
+    public NoteDto create(NoteDto noteDto) {
+<span class="nc" id="L64">        Note note = noteMapper.toEntity(noteDto);</span>
+<span class="nc" id="L65">        Note savedNote = noteRepository.save(note);</span>
+<span class="nc" id="L66">        return noteMapper.toDto(savedNote);</span>
+    }
+
+    /**
+     * Deletes a note by its ID.
+     *
+     * @param noteId the ID of the note to be deleted
+     */
+    public void delete(String noteId) {
+        try {
+<span class="nc" id="L76">            log.debug(&quot;Attempting to delete note with ID: &quot; + noteId);</span>
+<span class="nc" id="L77">            noteRepository.deleteById(noteId);</span>
+<span class="nc" id="L78">        } catch (Exception e) {</span>
+<span class="nc" id="L79">            log.error(noteId + &quot; not found for deletion.&quot;);</span>
+<span class="nc" id="L80">            throw new ResourceNotFoundException(&quot;Note with ID &quot; + noteId + &quot; not found for deletion.&quot;);</span>
+<span class="nc" id="L81">        }</span>
+
+<span class="nc" id="L83">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
