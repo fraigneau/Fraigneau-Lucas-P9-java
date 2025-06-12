@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.medilabo.solutions.assessment.dto.NoteDto;
 
-@FeignClient(name = "note-service", url = "${services.note-service.url:http://localhost:8082}")
+@FeignClient(name = "note")
 public interface NoteServiceClient {
 
     @GetMapping("/api/note/{patId}")
