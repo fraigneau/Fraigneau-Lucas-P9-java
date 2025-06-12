@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.medilabo.solutions.assessment.dto.PatientDto;
 
-@FeignClient(name = "patient-service", url = "${services.patient-service.url:http://localhost:8081}")
+@FeignClient(name = "patient")
 public interface PatientServiceClient {
 
     @GetMapping("/api/patient/{id}")

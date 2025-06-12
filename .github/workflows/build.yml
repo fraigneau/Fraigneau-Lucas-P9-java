@@ -20,7 +20,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Detect changes
+      - name: Detect changes (only for push events)
+        if: github.event_name == 'push'
         uses: dorny/paths-filter@v2
         id: changes
         with:
@@ -34,6 +35,15 @@ jobs:
             gateway:
               - 'gateway/**'
 
+      - name: Set all services as changed (for pull requests)
+        if: github.event_name == 'pull_request'
+        id: force-changes
+        run: |
+          echo "patient=true" >> $GITHUB_OUTPUT
+          echo "note=true" >> $GITHUB_OUTPUT
+          echo "assessment=true" >> $GITHUB_OUTPUT
+          echo "gateway=true" >> $GITHUB_OUTPUT
+
   build-patient:
     runs-on: ubuntu-latest
     needs: detect-changes
@@ -41,8 +51,6 @@ jobs:
     continue-on-error: true
     outputs:
       start-time: ${{ steps.start-time.outputs.time }}
-      end-time: ${{ steps.end-time.outputs.time }}
-      duration: ${{ steps.duration.outputs.duration }}
       status: ${{ steps.build-status.outputs.status }}
     steps:
       - name: Record start time
@@ -167,8 +175,6 @@ jobs:
     continue-on-error: true
     outputs:
       start-time: ${{ steps.start-time.outputs.time }}
-      end-time: ${{ steps.end-time.outputs.time }}
-      duration: ${{ steps.duration.outputs.duration }}
       status: ${{ steps.build-status.outputs.status }}
     steps:
       - name: Record start time
@@ -231,8 +237,6 @@ jobs:
     continue-on-error: true
     outputs:
       start-time: ${{ steps.start-time.outputs.time }}
-      end-time: ${{ steps.end-time.outputs.time }}
-      duration: ${{ steps.duration.outputs.duration }}
       status: ${{ steps.build-status.outputs.status }}
     steps:
       - name: Record start time
