@@ -13,7 +13,6 @@ jobs:
       patient: ${{ steps.changes.outputs.patient }}
       note: ${{ steps.changes.outputs.note }}
       assessment: ${{ steps.changes.outputs.assessment }}
-      gateway: ${{ steps.changes.outputs.gateway }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,8 +31,6 @@ jobs:
               - 'note/**'
             assessment:
               - 'assessment/**'
-            gateway:
-              - 'gateway/**'
 
       - name: Set all services as changed (for pull requests)
         if: github.event_name == 'pull_request'
@@ -42,7 +39,6 @@ jobs:
           echo "patient=true" >> $GITHUB_OUTPUT
           echo "note=true" >> $GITHUB_OUTPUT
           echo "assessment=true" >> $GITHUB_OUTPUT
-          echo "gateway=true" >> $GITHUB_OUTPUT
 
   build-patient:
     runs-on: ubuntu-latest
@@ -230,78 +226,9 @@ jobs:
             echo "status=❌ Failed" >> $GITHUB_OUTPUT
           fi
 
-  build-gateway:
-    runs-on: ubuntu-latest
-    needs: detect-changes
-    if: needs.detect-changes.outputs.gateway == 'true'
-    continue-on-error: true
-    outputs:
-      start-time: ${{ steps.start-time.outputs.time }}
-      status: ${{ steps.build-status.outputs.status }}
-    steps:
-      - name: Record start time
-        id: start-time
-        run: echo "time=$(date +%s)" >> $GITHUB_OUTPUT
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: "21"
-          distribution: "temurin"
-          cache: maven
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-gateway-${{ hashFiles('gateway/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2-gateway
-
-      - name: Run tests with coverage
-        working-directory: ./gateway
-        run: |
-          mvn clean package test jacoco:report javadoc:javadoc surefire-report:report
-
-      - name: Upload Test Results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: gateway-test-results
-          path: |
-            gateway/target/site/surefire/
-            gateway/target/site/jacoco/
-            gateway/target/site/apidocs/
-
-      - name: Upload JAR Artifact
-        uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: gateway-jar
-          path: gateway/target/*.jar
-
-      - name: Set build status
-        id: build-status
-        if: always()
-        run: |
-          if [ "${{ job.status }}" = "success" ]; then
-            echo "status=✅ Success" >> $GITHUB_OUTPUT
-          else
-            echo "status=❌ Failed" >> $GITHUB_OUTPUT
-          fi
-
   build-summary:
     runs-on: ubuntu-latest
-    needs:
-      [
-        detect-changes,
-        build-patient,
-        build-note,
-        build-assessment,
-        build-gateway,
-      ]
+    needs: [detect-changes, build-patient, build-note, build-assessment]
     if: always()
     steps:
       - name: Build Summary
@@ -350,17 +277,6 @@ jobs:
             echo "⏭️ Assessment - Skipped (no changes)" >> $GITHUB_STEP_SUMMARY
           fi
 
-          # Gateway
-          if [ "${{ needs.detect-changes.outputs.gateway }}" = "true" ]; then
-            if [ "${{ needs.build-gateway.result }}" = "success" ]; then
-              echo "✅ Gateway - Build OK" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "❌ Gateway - Build Failed" >> $GITHUB_STEP_SUMMARY
-            fi
-          else
-            echo "⏭️ Gateway - Skipped (no changes)" >> $GITHUB_STEP_SUMMARY
-          fi
-
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Résultat final
@@ -368,7 +284,6 @@ jobs:
           if [ "${{ needs.build-patient.result }}" = "failure" ]; then FAILED=1; fi
           if [ "${{ needs.build-note.result }}" = "failure" ]; then FAILED=1; fi
           if [ "${{ needs.build-assessment.result }}" = "failure" ]; then FAILED=1; fi
-          if [ "${{ needs.build-gateway.result }}" = "failure" ]; then FAILED=1; fi
 
           if [ $FAILED -eq 1 ]; then
             echo "## 🚨 Some builds failed!" >> $GITHUB_STEP_SUMMARY
