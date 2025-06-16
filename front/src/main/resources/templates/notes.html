@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Dossier Patient - Medilabo Solutions</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 10px 0;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      input,
+      textarea,
+      select {
+        width: 200px;
+        padding: 5px;
+      }
+      .error {
+        color: red;
+      }
+      .success {
+        color: green;
+      }
+      hr {
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Dossier Patient</h1>
+
+    <p><a href="/home">← Retour à la liste</a></p>
+
+    <!-- Messages -->
+    <div th:if="${success}" class="success" th:text="${success}"></div>
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+    <div th:if="${patientError}" class="error" th:text="${patientError}"></div>
+    <div th:if="${noteError}" class="error" th:text="${noteError}"></div>
+
+    <!-- Résumé -->
+    <h2>Résumé</h2>
+    <table>
+      <tr>
+        <th>ID Patient</th>
+        <td th:text="${patient?.id}">123</td>
+      </tr>
+      <tr>
+        <th>Nom complet</th>
+        <td th:text="${patient?.firstname + ' ' + patient?.lastname}">
+          Nom Prénom
+        </td>
+      </tr>
+      <tr>
+        <th>Date de naissance</th>
+        <td th:text="${#temporals.format(patient?.birthDate, 'dd/MM/yyyy')}">
+          01/01/1990
+        </td>
+      </tr>
+      <tr>
+        <th>Genre</th>
+        <td th:text="${patient?.gender == 'M' ? 'Masculin' : 'Féminin'}">
+          Genre
+        </td>
+      </tr>
+      <tr>
+        <th>Nombre de notes</th>
+        <td th:text="${notes != null ? notes.size() : 0}">0</td>
+      </tr>
+    </table>
+
+    <!-- Modifier Patient -->
+    <p>
+      <a th:href="@{'/patient/' + ${patient?.id} + '/edit'}">
+        <button type="button">Modifier le patient</button>
+      </a>
+    </p>
+
+    <hr />
+
+    <!-- Niveau de Risque -->
+    <h2>Niveau de Risque Diabétique</h2>
+    <p>
+      <strong>Évaluation actuelle :</strong>
+      <span th:text="${riskLevel ?: 'Non évalué'}">Non évalué</span>
+    </p>
+
+    <hr />
+
+    <!-- Notes Médicales -->
+    <h2>Notes Médicales</h2>
+
+    <h3>Historique des notes</h3>
+    <div th:if="${notes != null and !notes.empty}">
+      <table>
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="note : ${notes}">
+            <td th:text="${note.patient}">Patient</td>
+            <td th:text="${note.note}">Contenu de la note</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div th:if="${notes == null or notes.empty}">
+      <p><em>Aucune note médicale pour ce patient.</em></p>
+    </div>
+
+    <h3>Ajouter une nouvelle note</h3>
+    <form
+      th:action="@{'/notes/' + ${patient?.id}}"
+      method="post"
+      th:object="${newNote}"
+    >
+      <table>
+        <tr>
+          <th>Nouvelle note</th>
+          <td>
+            <textarea
+              th:field="*{note}"
+              rows="4"
+              cols="50"
+              placeholder="Saisir la note médicale..."
+              required
+            ></textarea>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <button type="submit">Ajouter la note</button>
+          </td>
+        </tr>
+      </table>
+    </form>
+
+    <hr />
+
+    <footer>
+      <hr />
+      <p>&copy; 2024 Medilabo Solutions</p>
+    </footer>
+  </body>
+</html>

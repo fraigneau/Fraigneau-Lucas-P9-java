@@ -1,16 +1,40 @@
-// package com.medilabo.solutions.front.controller;
+package com.medilabo.solutions.front.controller;
 
-// import org.springframework.stereotype.Controller;
+import java.util.List;
 
-// @Controller
-// public class HomeController {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 
-// @GetMapping("/home"){
+import com.medilabo.solutions.front.client.GatewayServiceClient;
+import com.medilabo.solutions.front.dto.PatientDto;
 
-// // recupere la liste des patients grace au client Gateway et au service
-// patient
-// // affiche une page d'accueil avec la liste des patients
+@Controller
+public class HomeController {
 
-// }
+    private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
-// }
+    @Autowired
+    private GatewayServiceClient gatewayServiceClient;
+
+    @GetMapping("/home")
+    public String home(Model model) {
+        try {
+            List<PatientDto> patients = gatewayServiceClient.getAllPatients();
+
+            model.addAttribute("patients", patients);
+
+            logger.info("Successfully retrieved {} patients", patients.size());
+
+        } catch (Exception e) {
+            logger.error("Error retrieving patients: {}", e.getMessage());
+            model.addAttribute("error", "Erreur lors de la récupération des patients");
+        }
+
+        return "home";
+    }
+
+}

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Medilabo Solutions - Liste des Patients</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      .error {
+        color: red;
+        background-color: #ffe6e6;
+        padding: 10px;
+        border: 1px solid red;
+      }
+      .no-patients {
+        text-align: center;
+        padding: 50px;
+        background-color: #f9f9f9;
+      }
+      .actions a {
+        margin-right: 10px;
+        text-decoration: none;
+        color: blue;
+      }
+      .actions a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Medilabo Solutions - Liste des Patients</h1>
+
+    <!-- Message d'erreur -->
+    <div th:if="${error}" class="error">
+      Erreur : <span th:text="${error}">Erreur</span>
+    </div>
+
+    <p>
+      <a href="/patient/new">Ajouter un nouveau patient</a>
+    </p>
+
+    <!-- Liste des patients -->
+    <div th:if="${patients != null and !patients.empty}">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Prénom</th>
+            <th>Nom</th>
+            <th>Date de naissance</th>
+            <th>Genre</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="patient : ${patients}">
+            <td th:text="${patient.id}">123</td>
+            <td th:text="${patient.firstname}">Prénom</td>
+            <td th:text="${patient.lastname}">Nom</td>
+            <td th:text="${#temporals.format(patient.birthDate, 'dd/MM/yyyy')}">
+              01/01/1990
+            </td>
+            <td th:text="${patient.gender == 'M' ? 'Masculin' : 'Féminin'}">
+              Genre
+            </td>
+            <td class="actions">
+              <a th:href="@{'/notes/' + ${patient.id}}">Voir</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Message si aucun patient -->
+    <div th:if="${patients == null or patients.empty}" class="no-patients">
+      <h2>Aucun patient trouvé</h2>
+      <p>Il n'y a actuellement aucun patient enregistré dans le système.</p>
+      <p><a href="/patient/add">Ajouter le premier patient</a></p>
+    </div>
+
+    <hr />
+    <footer>
+      <p>&copy; 2024 Medilabo Solutions</p>
+    </footer>
+  </body>
+</html>
