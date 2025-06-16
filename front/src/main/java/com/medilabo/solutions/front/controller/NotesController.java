@@ -28,7 +28,8 @@ public class NotesController {
     private GatewayServiceClient gatewayServiceClient;
 
     /**
-     * Retrieves and displays patient notes along with patient information and risk assessment.
+     * Retrieves and displays patient notes along with patient information and risk
+     * assessment.
      * 
      * This method fetches comprehensive patient data including:
      * - Patient details by ID
@@ -36,13 +37,17 @@ public class NotesController {
      * - Risk assessment level for the patient
      * 
      * It also prepares a new empty note object for potential note creation.
-     * In case of any error during data retrieval, an error message is added to the model.
+     * In case of any error during data retrieval, an error message is added to the
+     * model.
      * 
-     * @param patientId the unique identifier of the patient whose notes are to be retrieved
-     * @param model the Spring MVC model to which attributes are added for view rendering
+     * @param patientId the unique identifier of the patient whose notes are to be
+     *                  retrieved
+     * @param model     the Spring MVC model to which attributes are added for view
+     *                  rendering
      * @return the name of the view template ("notes") to be rendered
      * 
-     * @throws Exception if there's an error during patient data retrieval from gateway services
+     * @throws Exception if there's an error during patient data retrieval from
+     *                   gateway services
      */
     @GetMapping("/notes/{id}")
     public String getPatientNotes(@PathVariable("id") Long patientId, Model model) {
@@ -73,25 +78,35 @@ public class NotesController {
     /**
      * Adds a new note for a specific patient.
      * 
-     * This method handles the POST request to create a new note associated with a patient.
-     * It validates the note data, retrieves patient information to set the patient name,
+     * This method handles the POST request to create a new note associated with a
+     * patient.
+     * It validates the note data, retrieves patient information to set the patient
+     * name,
      * and saves the note through the gateway service client.
      * 
-     * @param patientId the unique identifier of the patient for whom the note is being added
-     * @param noteDto the note data transfer object containing the note information to be saved
-     * @param bindingResult the result of the validation process for the noteDto
-     * @param redirectAttributes attributes to be passed to the redirect view for displaying messages
+     * @param patientId          the unique identifier of the patient for whom the
+     *                           note is being added
+     * @param noteDto            the note data transfer object containing the note
+     *                           information to be saved
+     * @param bindingResult      the result of the validation process for the
+     *                           noteDto
+     * @param redirectAttributes attributes to be passed to the redirect view for
+     *                           displaying messages
      * @return a redirect URL to the notes page for the specified patient
      * 
-     * @throws Exception if there's an error during patient retrieval or note creation
+     * @throws Exception if there's an error during patient retrieval or note
+     *                   creation
      * 
-     * The method performs the following operations:
-     * - Validates the input note data and returns with error message if validation fails
-     * - Retrieves patient information to set the patient name in the note
-     * - Sets the patient ID and clears any existing note ID for auto-generation
-     * - Creates the note through the gateway service
-     * - Adds success or error messages to redirect attributes
-     * - Logs the operation result for monitoring purposes
+     *                   The method performs the following operations:
+     *                   - Validates the input note data and returns with error
+     *                   message if validation fails
+     *                   - Retrieves patient information to set the patient name in
+     *                   the note
+     *                   - Sets the patient ID and clears any existing note ID for
+     *                   auto-generation
+     *                   - Creates the note through the gateway service
+     *                   - Adds success or error messages to redirect attributes
+     *                   - Logs the operation result for monitoring purposes
      */
     @PostMapping("/notes/{id}")
     public String addNote(@PathVariable("id") Long patientId,
@@ -105,11 +120,9 @@ public class NotesController {
         }
 
         try {
-            // Récupérer les informations du patient pour obtenir son nom
             PatientDto patient = gatewayServiceClient.getPatientById(patientId);
 
-            // Ensure the noteDto has the correct patient ID and patient name
-            noteDto.setId(null); // Ne pas définir l'ID, il sera généré automatiquement
+            noteDto.setId(null);
             noteDto.setPatId(patientId.intValue());
             noteDto.setPatient(patient.getFirstname());
 
@@ -130,22 +143,28 @@ public class NotesController {
     /**
      * Updates an existing patient's information.
      * 
-     * This endpoint handles POST requests to update patient data. It validates the input,
-     * updates the patient through the gateway service, and redirects back to the patient's
+     * This endpoint handles POST requests to update patient data. It validates the
+     * input,
+     * updates the patient through the gateway service, and redirects back to the
+     * patient's
      * notes page with appropriate success or error messages.
      * 
-     * @param patientId the unique identifier of the patient to update
-     * @param patientDto the patient data transfer object containing updated information,
-     *                   validated with @Valid annotation
-     * @param bindingResult the result of the validation process, contains any validation errors
-     * @param redirectAttributes attributes to be passed to the redirect target for flash messages
+     * @param patientId          the unique identifier of the patient to update
+     * @param patientDto         the patient data transfer object containing updated
+     *                           information,
+     *                           validated with @Valid annotation
+     * @param bindingResult      the result of the validation process, contains any
+     *                           validation errors
+     * @param redirectAttributes attributes to be passed to the redirect target for
+     *                           flash messages
      * @return redirect URL to the patient's notes page (/notes/{patientId})
      * 
      * @throws Exception if an error occurs during the patient update process
      * 
-     * Flash attributes added:
-     * - "success": confirmation message when update is successful
-     * - "patientError": error message when validation fails or update operation fails
+     *                   Flash attributes added:
+     *                   - "success": confirmation message when update is successful
+     *                   - "patientError": error message when validation fails or
+     *                   update operation fails
      */
     @PostMapping("/patient/{id}/update")
     public String updatePatient(@PathVariable("id") Long patientId,

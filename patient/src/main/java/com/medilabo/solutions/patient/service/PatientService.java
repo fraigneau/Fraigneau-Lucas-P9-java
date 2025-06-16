@@ -3,6 +3,9 @@ package com.medilabo.solutions.patient.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.medilabo.solutions.patient.dto.PatientDto;
@@ -73,6 +76,11 @@ public class PatientService implements CrudService<PatientDto> {
         return patientRepository.findAll().stream()
                 .map(patientMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    public Page<PatientDto> findAll(Pageable pageable) {
+        return patientRepository.findAll(pageable)
+                .map(patientMapper::toDto);
     }
 
     /**

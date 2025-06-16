@@ -21,9 +21,9 @@
     </div>
 
     <div class="mb-3 mt-5 w-75 mx-auto">
-      <a href="/patient/new" class="btn btn-primary">
-        Ajouter un nouveau patient
-      </a>
+      <a href="/patient/new" class="btn btn-primary"
+        >Ajouter un nouveau patient</a
+      >
     </div>
 
     <!-- Liste des patients -->
@@ -52,8 +52,7 @@
                 th:text="${patient.gender == 'M' ? 'Masculin' : 'Féminin'}"
                 class="badge"
                 th:classappend="${patient.gender == 'M' ? 'bg-primary' : 'bg-info'}"
-              >
-              </span>
+              ></span>
             </td>
             <td>
               <a
@@ -65,6 +64,45 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center mt-4">
+      <nav th:if="${totalPages > 1}">
+        <ul class="pagination">
+          <li
+            class="page-item"
+            th:classappend="${currentPage == 0} ? 'disabled'"
+          >
+            <a
+              class="page-link"
+              th:href="@{/home(page=${currentPage - 1}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir})}"
+              >Précédent</a
+            >
+          </li>
+          <li
+            class="page-item"
+            th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+            th:classappend="${i == currentPage} ? 'active'"
+          >
+            <a
+              class="page-link"
+              th:href="@{/home(page=${i}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir})}"
+              th:text="${i + 1}"
+            ></a>
+          </li>
+          <li
+            class="page-item"
+            th:classappend="${currentPage == totalPages - 1} ? 'disabled'"
+          >
+            <a
+              class="page-link"
+              th:href="@{/home(page=${currentPage + 1}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir})}"
+              >Suivant</a
+            >
+          </li>
+        </ul>
+      </nav>
     </div>
 
     <div th:replace="~{fragments/footer :: footer}"></div>
