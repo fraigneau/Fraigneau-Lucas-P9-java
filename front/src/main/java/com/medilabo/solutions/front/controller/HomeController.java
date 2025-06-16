@@ -20,6 +20,16 @@ public class HomeController {
     @Autowired
     private GatewayServiceClient gatewayServiceClient;
 
+    /**
+     * Handles GET requests to the home page and displays a list of all patients.
+     * 
+     * This method retrieves all patients from the gateway service and adds them to the model
+     * for display on the home page. If an error occurs during retrieval, an error message
+     * is added to the model instead.
+     * 
+     * @param model the Spring Model object used to pass data to the view
+     * @return the name of the view template ("home") to be rendered
+     */
     @GetMapping("/home")
     public String home(Model model) {
         try {

@@ -25,8 +25,16 @@ public class PatientFormController {
     @Autowired
     private GatewayServiceClient gatewayServiceClient;
 
+
     /**
-     * Affiche le formulaire pour créer un nouveau patient
+     * Displays the form for creating a new patient.
+     * 
+     * This method handles GET requests to "/patient/new" and prepares the model
+     * with a new empty PatientDto object and the necessary attributes for rendering
+     * the patient creation form.
+     * 
+     * @param model the Spring Model object used to pass attributes to the view
+     * @return the name of the view template "patient-form" to be rendered
      */
     @GetMapping("/patient/new")
     public String showNewPatientForm(Model model) {
@@ -34,11 +42,26 @@ public class PatientFormController {
         model.addAttribute("patient", patient);
         model.addAttribute("isEdit", false);
         model.addAttribute("pageTitle", "Nouveau Patient");
-        return "patient-form";
+        return "patientform";
     }
 
+
     /**
-     * Affiche le formulaire pour modifier un patient existant
+     * Displays the edit form for an existing patient.
+     * 
+     * @param patientId the unique identifier of the patient to edit
+     * @param model the Spring Model object to pass data to the view
+     * @return the name of the patient form view template, or redirects to home on error
+     * 
+     * @throws Exception if patient retrieval fails or patient is not found
+     * 
+     * This method retrieves patient data by ID and prepares the model with:
+     * - patient: the PatientDto object containing patient information
+     * - isEdit: boolean flag set to true indicating edit mode
+     * - pageTitle: localized title for the edit form
+     * 
+     * On success, returns "patient-form" view. On error, logs the exception
+     * and redirects to "/home" with an error message.
      */
     @GetMapping("/patient/{id}/edit")
     public String showEditPatientForm(@PathVariable("id") Long patientId, Model model) {
@@ -53,11 +76,34 @@ public class PatientFormController {
             model.addAttribute("error", "Erreur lors du chargement du patient");
             return "redirect:/home";
         }
-        return "patient-form";
+        return "patientform";
     }
 
+
     /**
-     * Traite la soumission du formulaire (création ou mise à jour)
+     * Handles the form submission for saving a patient (create or update operation).
+     * 
+     * This method processes patient data from a form submission, validates the input,
+     * and either creates a new patient or updates an existing one based on whether
+     * the patient ID is present.
+     * 
+     * @param patientDto The patient data transfer object containing form data, validated with @Valid
+     * @param bindingResult The result of the validation process, contains any validation errors
+     * @param model The Spring MVC model for adding attributes to the view
+     * @param redirectAttributes Attributes to be passed during redirect operations
+     * @return String representing the view name or redirect URL:
+     *         - "patient-form" if validation errors occur or an exception is thrown
+     *         - "redirect:/home" if the patient is successfully saved
+     * 
+     * @throws Exception if there's an error during the save operation (caught and handled internally)
+     * 
+     * The method performs the following operations:
+     * - Validates the patient data and returns to form view if validation fails
+     * - Determines if this is a create or update operation based on patient ID
+     * - Calls the appropriate gateway service method (create or update)
+     * - Adds success/error messages to flash attributes or model
+     * - Logs the operation results
+     * - Redirects to home page on success or returns to form on error
      */
     @PostMapping("/patient/save")
     public String savePatient(@Valid @ModelAttribute("patient") PatientDto patientDto,
@@ -65,23 +111,20 @@ public class PatientFormController {
             Model model,
             RedirectAttributes redirectAttributes) {
 
-        // Vérification des erreurs de validation
         if (bindingResult.hasErrors()) {
             model.addAttribute("isEdit", patientDto.getId() != 0);
             model.addAttribute("pageTitle", patientDto.getId() != 0 ? "Modifier Patient" : "Nouveau Patient");
-            return "patient-form";
+            return "patientform";
         }
 
         try {
             boolean isEdit = patientDto.getId() != 0;
 
             if (isEdit) {
-                // Mise à jour d'un patient existant
                 gatewayServiceClient.updatePatient((long) patientDto.getId(), patientDto);
                 redirectAttributes.addFlashAttribute("success", "Patient mis à jour avec succès");
                 logger.info("Successfully updated patient {}", patientDto.getId());
             } else {
-                // Création d'un nouveau patient
                 PatientDto savedPatient = gatewayServiceClient.createPatient(patientDto);
                 redirectAttributes.addFlashAttribute("success", "Patient créé avec succès");
                 logger.info("Successfully created new patient with ID {}", savedPatient.getId());
@@ -94,7 +137,7 @@ public class PatientFormController {
             model.addAttribute("error", "Erreur lors de l'enregistrement du patient");
             model.addAttribute("isEdit", patientDto.getId() != 0);
             model.addAttribute("pageTitle", patientDto.getId() != 0 ? "Modifier Patient" : "Nouveau Patient");
-            return "patient-form";
+            return "patientform";
         }
     }
 }
