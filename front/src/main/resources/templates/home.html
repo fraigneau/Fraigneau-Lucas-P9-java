@@ -4,62 +4,32 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Medilabo Solutions - Liste des Patients</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-      }
-      th,
-      td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-      }
-      th {
-        background-color: #f2f2f2;
-      }
-      .error {
-        color: red;
-        background-color: #ffe6e6;
-        padding: 10px;
-        border: 1px solid red;
-      }
-      .no-patients {
-        text-align: center;
-        padding: 50px;
-        background-color: #f9f9f9;
-      }
-      .actions a {
-        margin-right: 10px;
-        text-decoration: none;
-        color: blue;
-      }
-      .actions a:hover {
-        text-decoration: underline;
-      }
-    </style>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <h1>Medilabo Solutions - Liste des Patients</h1>
+    <div th:replace="~{fragments/header :: header}"></div>
 
-    <!-- Message d'erreur -->
-    <div th:if="${error}" class="error">
-      Erreur : <span th:text="${error}">Erreur</span>
+    <div th:if="${error}" class="alert alert-danger">
+      <strong>Erreur :</strong> <span th:text="${error}">Erreur</span>
     </div>
 
-    <p>
-      <a href="/patient/new">Ajouter un nouveau patient</a>
-    </p>
+    <div th:if="${success}" class="alert alert-success">
+      <span th:text="${success}">Succès</span>
+    </div>
+
+    <div class="mb-3 mt-5 w-75 mx-auto">
+      <a href="/patient/new" class="btn btn-primary">
+        Ajouter un nouveau patient
+      </a>
+    </div>
 
     <!-- Liste des patients -->
-    <div th:if="${patients != null and !patients.empty}">
-      <table>
-        <thead>
+    <div class="table-responsive w-75 mx-auto">
+      <table class="table table-striped table-hover">
+        <thead class="table-dark">
           <tr>
             <th>ID</th>
             <th>Prénom</th>
@@ -71,33 +41,32 @@
         </thead>
         <tbody>
           <tr th:each="patient : ${patients}">
-            <td th:text="${patient.id}">123</td>
-            <td th:text="${patient.firstname}">Prénom</td>
-            <td th:text="${patient.lastname}">Nom</td>
-            <td th:text="${#temporals.format(patient.birthDate, 'dd/MM/yyyy')}">
-              01/01/1990
+            <td th:text="${patient.id}"></td>
+            <td th:text="${patient.firstname}"></td>
+            <td th:text="${patient.lastname}"></td>
+            <td
+              th:text="${#temporals.format(patient.birthDate, 'dd/MM/yyyy')}"
+            ></td>
+            <td>
+              <span
+                th:text="${patient.gender == 'M' ? 'Masculin' : 'Féminin'}"
+                class="badge"
+                th:classappend="${patient.gender == 'M' ? 'bg-primary' : 'bg-info'}"
+              >
+              </span>
             </td>
-            <td th:text="${patient.gender == 'M' ? 'Masculin' : 'Féminin'}">
-              Genre
-            </td>
-            <td class="actions">
-              <a th:href="@{'/notes/' + ${patient.id}}">Voir</a>
+            <td>
+              <a
+                th:href="@{'/notes/' + ${patient.id}}"
+                class="btn btn-sm btn-outline-primary"
+                >Accéder</a
+              >
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Message si aucun patient -->
-    <div th:if="${patients == null or patients.empty}" class="no-patients">
-      <h2>Aucun patient trouvé</h2>
-      <p>Il n'y a actuellement aucun patient enregistré dans le système.</p>
-      <p><a href="/patient/add">Ajouter le premier patient</a></p>
-    </div>
-
-    <hr />
-    <footer>
-      <p>&copy; 2024 Medilabo Solutions</p>
-    </footer>
+    <div th:replace="~{fragments/footer :: footer}"></div>
   </body>
 </html>
