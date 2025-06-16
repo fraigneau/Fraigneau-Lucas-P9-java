@@ -29,10 +29,11 @@ public class AssessmentService {
             "taille",
             "poids",
             "fumeur",
+            "fumeuse",
             "anormal",
-            "anormale",
             "cholestérol",
             "vertige",
+            "rechute",
             "réaction",
             "anticorps");
 

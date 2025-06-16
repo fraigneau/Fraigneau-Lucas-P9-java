@@ -3,6 +3,10 @@ package com.medilabo.solutions.patient.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,9 +16,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.medilabo.solutions.patient.dto.PatientDto;
+import com.medilabo.solutions.patient.exception.ResourceNotFoundException;
 import com.medilabo.solutions.patient.service.PatientService;
 
 import jakarta.validation.Valid;
@@ -34,6 +40,30 @@ public class PatientController {
     @GetMapping
     public ResponseEntity<List<PatientDto>> getAllPatients() {
         List<PatientDto> patients = patientService.findAll();
+        return ResponseEntity.ok(patients);
+    }
+
+    /**
+     * Retrieves a paginated list of all patients with sorting capabilities.
+     * 
+     * @param page    the page number to retrieve (0-based indexing, defaults to 0)
+     * @param size    the number of patients per page (defaults to 10)
+     * @param sortBy  the field name to sort by (defaults to "id")
+     * @param sortDir the sort direction, either "asc" or "desc" (defaults to "asc")
+     * @return ResponseEntity containing a Page of PatientDto objects with HTTP 200
+     *         status
+     */
+    @GetMapping("/page")
+    public ResponseEntity<Page<PatientDto>> getAllPatients(@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "2") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<PatientDto> patients = patientService.findAll(pageable);
+
         return ResponseEntity.ok(patients);
     }
 
