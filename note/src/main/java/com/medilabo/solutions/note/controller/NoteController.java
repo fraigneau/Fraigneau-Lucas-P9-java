@@ -65,17 +65,4 @@ public class NoteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdNote);
     }
 
-    /**
-     * Deletes a note based on its ID.
-     * 
-     * @param noteId the unique identifier of the note to be deleted
-     * @return a ResponseEntity with HTTP status 204 (NO_CONTENT) indicating
-     *         successful deletion with no content to return
-     */
-    @DeleteMapping
-    public ResponseEntity<Void> deleteNote(@PathVariable String noteId) {
-        noteService.delete(noteId);
-        return ResponseEntity.noContent().build();
-    }
-
 }

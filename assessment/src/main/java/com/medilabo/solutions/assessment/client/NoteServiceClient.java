@@ -8,11 +8,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.medilabo.solutions.assessment.dto.NoteDto;
 
-//TODO on passe par gateway ici aussi ou pas ?
 @FeignClient(name = "note")
 public interface NoteServiceClient {
 
     @GetMapping("/api/note/{patId}")
     List<NoteDto> getNoteByPatientId(@PathVariable("patId") int patId);
-    
-} 
+
+}

@@ -33,9 +33,9 @@ public class PatientController {
     private PatientService patientService;
 
     /**
-     * Récupère tous les patients
+     * Retrieves all patients from the database.
      * 
-     * @return Liste de tous les patients
+     * @return ResponseEntity containing a list of PatientDto objects with HTTP 200 OK status
      */
     @GetMapping
     public ResponseEntity<List<PatientDto>> getAllPatients() {
@@ -68,10 +68,11 @@ public class PatientController {
     }
 
     /**
-     * Récupère un patient par son ID
-     * 
-     * @param id L'identifiant du patient
-     * @return Le patient correspondant à l'ID
+     * Retrieves a patient by their unique identifier.
+     *
+     * @param id the unique identifier of the patient to retrieve
+     * @return ResponseEntity containing the PatientDto if found, with HTTP 200 OK status
+     * @throws PatientNotFoundException if no patient exists with the given id
      */
     @GetMapping("/{id}")
     public ResponseEntity<PatientDto> getPatient(@PathVariable int id) {
@@ -79,11 +80,14 @@ public class PatientController {
         return ResponseEntity.ok(patient);
     }
 
+
     /**
-     * Crée un nouveau patient
+     * Creates a new patient in the system.
      * 
-     * @param patientDto Les données du patient à créer
-     * @return Le patient créé
+     * @param patientDto the patient data transfer object containing patient information to be created.
+     *                   Must be valid according to validation constraints.
+     * @return ResponseEntity containing the created PatientDto with HTTP status 201 (CREATED)
+     * @throws ValidationException if the provided patientDto fails validation
      */
     @PostMapping
     public ResponseEntity<PatientDto> createPatient(@Valid @RequestBody PatientDto patientDto) {
@@ -91,19 +95,20 @@ public class PatientController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPatient);
     }
 
+
     /**
-     * Met à jour un patient existant
+     * Updates an existing patient with the provided information.
      * 
-     * @param id         L'identifiant du patient à mettre à jour
-     * @param patientDto Les nouvelles données du patient
-     * @return Le patient mis à jour
+     * @param id the unique identifier of the patient to update
+     * @param patientDto the patient data transfer object containing updated patient information
+     * @return ResponseEntity containing the updated PatientDto and HTTP 200 OK status
+     * @throws PatientNotFoundException if no patient exists with the specified ID
+     * @throws ValidationException if the provided patientDto fails validation constraints
      */
     @PutMapping("/{id}")
     public ResponseEntity<PatientDto> updatePatient(@PathVariable int id, @Valid @RequestBody PatientDto patientDto) {
-        // Vérifier que le patient existe d'abord
         patientService.findById(id);
 
-        // S'assurer que l'ID du DTO correspond à celui du path
         patientDto.setId(id);
 
         PatientDto updatedPatient = patientService.update(patientDto);

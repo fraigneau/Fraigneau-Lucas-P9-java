@@ -58,7 +58,7 @@ public class AssessmentService {
     public DiabetesRiskLevelEnum assessDiabetesRisk(int patId) {
         log.info("Creating assessment for patient ID: {}", patId);
 
-        PatientDto patientDto = patientServiceClient.getPatientById(Long.valueOf(patId));
+        PatientDto patientDto = patientServiceClient.getPatientById(patId);
         List<NoteDto> notes = noteServiceClient.getNoteByPatientId(patId);
 
         int age = calculateAge(patientDto.getBirthDate());

@@ -64,7 +64,6 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
-
 		<!-- Lombok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -121,11 +120,19 @@
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
 				<version>3.2.5</version>
 				<configuration>
-					<reportsDirectory>${surefire.reportsDir}</reportsDirectory>
+					<outputDirectory>${surefire.reportsDir}</outputDirectory>
 				</configuration>
+				<executions>
+					<execution>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 			<plugin>
@@ -209,6 +216,11 @@
 				<version>3.2.5</version>
 				<configuration>
 					<outputDirectory>${surefire.reportsDir}</outputDirectory>
+					<reportsDirectories>
+						<reportsDirectory>${surefire.reportsDir}</reportsDirectory>
+					</reportsDirectories>
+					<skipEmptyReport>false</skipEmptyReport>
+					<showSuccess>true</showSuccess>
 				</configuration>
 			</plugin>
 
