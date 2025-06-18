@@ -34,6 +34,7 @@ jobs:
           mkdir -p patient/
           mkdir -p note/
           mkdir -p assessment/
+          mkdir -p front/
 
       - name: Download artifacts from workflow run (patient)
         uses: actions/download-artifact@v4
@@ -65,6 +66,16 @@ jobs:
           repository: ${{ github.repository }}
           run-id: ${{ github.event.workflow_run.id }}
 
+      - name: Download artifacts from workflow run (assessment)
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: front-test-results
+          path: ./temp-front-docs/
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
+
       - name: Deploy documentation
         run: |
           if [ -d "./temp-patient-docs" ]; then
@@ -82,9 +93,15 @@ jobs:
             cp -r ./temp-assessment-docs/* assessment/
           fi
 
+          if [ -d "./temp-front-docs" ]; then
+            rm -rf front/*
+            cp -r ./temp-front-docs/* front/
+          fi
+
           rm -rf ./temp-patient-docs
           rm -rf ./temp-note-docs
           rm -rf ./temp-assessment-docs
+          rm -rf ./temp-front-docs
 
       - name: Commit and push to gh-pages
         run: |
