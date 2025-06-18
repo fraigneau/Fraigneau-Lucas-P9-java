@@ -2,4 +2,5 @@ com.medilabo.solutions.assessment
 com.medilabo.solutions.assessment.client
 com.medilabo.solutions.assessment.controller
 com.medilabo.solutions.assessment.dto
+com.medilabo.solutions.assessment.exception
 com.medilabo.solutions.assessment.service
