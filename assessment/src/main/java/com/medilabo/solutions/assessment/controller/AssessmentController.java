@@ -23,18 +23,27 @@ public class AssessmentController {
     /**
      * Retrieves the diabetes risk assessment for a specific patient.
      * 
-     * @param patId the unique identifier of the patient for whom to assess diabetes risk
-     * @return ResponseEntity containing the DiabetesRiskLevelEnum representing the patient's diabetes risk level
-     * @throws IllegalArgumentException if the patient ID is invalid or patient not found
+     * @param patId the unique identifier of the patient for whom to assess diabetes
+     *              risk
+     * @return ResponseEntity containing the DiabetesRiskLevelEnum representing the
+     *         patient's diabetes risk level
+     * @throws IllegalArgumentException if the patient ID is invalid or patient not
+     *                                  found
      */
     @GetMapping("/{patId}")
     public ResponseEntity<DiabetesRiskLevelEnum> getAssessment(@PathVariable Long patId) {
         log.info("Requesting diabetes risk assessment for patient ID: {}", patId);
 
-        DiabetesRiskLevelEnum riskLevel = assessmentService.assessDiabetesRisk(patId.intValue());
-
-        log.info("Risk level for patient {}: {}", patId, riskLevel);
-
-        return ResponseEntity.ok(riskLevel);
+        try {
+            DiabetesRiskLevelEnum riskLevel = assessmentService.assessDiabetesRisk(patId.intValue());
+            log.info("Risk level for patient {}: {}", patId, riskLevel);
+            return ResponseEntity.ok(riskLevel);
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid patient ID or patient not found: {}", patId, e);
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            log.error("Error assessing diabetes risk for patient {}", patId, e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }
