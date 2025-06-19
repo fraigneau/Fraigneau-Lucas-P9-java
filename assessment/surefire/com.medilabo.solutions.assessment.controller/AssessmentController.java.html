@@ -33,18 +33,10 @@ public class AssessmentController {
     @GetMapping(&quot;/{patId}&quot;)
     public ResponseEntity&lt;DiabetesRiskLevelEnum&gt; getAssessment(@PathVariable Long patId) {
 <span class="fc" id="L35">        log.info(&quot;Requesting diabetes risk assessment for patient ID: {}&quot;, patId);</span>
+<span class="fc" id="L36">        DiabetesRiskLevelEnum riskLevel = assessmentService.assessDiabetesRisk(patId.intValue());</span>
+<span class="fc" id="L37">        log.info(&quot;Risk level for patient {}: {}&quot;, patId, riskLevel);</span>
+<span class="fc" id="L38">        return ResponseEntity.ok(riskLevel);</span>
 
-        try {
-<span class="fc" id="L38">            DiabetesRiskLevelEnum riskLevel = assessmentService.assessDiabetesRisk(patId.intValue());</span>
-<span class="fc" id="L39">            log.info(&quot;Risk level for patient {}: {}&quot;, patId, riskLevel);</span>
-<span class="fc" id="L40">            return ResponseEntity.ok(riskLevel);</span>
-<span class="fc" id="L41">        } catch (IllegalArgumentException e) {</span>
-<span class="fc" id="L42">            log.error(&quot;Invalid patient ID or patient not found: {}&quot;, patId, e);</span>
-<span class="fc" id="L43">            return ResponseEntity.badRequest().build();</span>
-<span class="fc" id="L44">        } catch (Exception e) {</span>
-<span class="fc" id="L45">            log.error(&quot;Error assessing diabetes risk for patient {}&quot;, patId, e);</span>
-<span class="fc" id="L46">            return ResponseEntity.internalServerError().build();</span>
-        }
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

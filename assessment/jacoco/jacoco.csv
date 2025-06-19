@@ -4,6 +4,6 @@ assessment,com.medilabo.solutions.assessment.exception,GlobalExceptionHandler,49
 assessment,com.medilabo.solutions.assessment.exception,GlobalExceptionHandler.ErrorResponse,0,15,0,0,0,6,0,1,0,1
 assessment,com.medilabo.solutions.assessment.exception,FeignException,4,0,0,0,2,0,1,0,1,0
 assessment,com.medilabo.solutions.assessment.service,AssessmentService,0,211,3,25,0,38,3,18,0,7
-assessment,com.medilabo.solutions.assessment.controller,AssessmentController,0,40,0,0,0,11,0,2,0,2
+assessment,com.medilabo.solutions.assessment.controller,AssessmentController,0,22,0,0,0,5,0,2,0,2
 assessment,com.medilabo.solutions.assessment.dto,DiabetesRiskLevelEnum,3,39,0,0,1,8,1,2,1,2
 assessment,com.medilabo.solutions.assessment,AssessmentApplication,5,3,0,0,2,1,1,1,1,1
