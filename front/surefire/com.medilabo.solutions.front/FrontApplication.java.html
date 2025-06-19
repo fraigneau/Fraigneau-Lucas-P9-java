@@ -2,15 +2,17 @@
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableFeignClients
-<span class="fc" id="L9">public class FrontApplication {</span>
+@EnableCaching
+<span class="fc" id="L11">public class FrontApplication {</span>
 
 	public static void main(String[] args) {
-<span class="nc" id="L12">		SpringApplication.run(FrontApplication.class, args);</span>
-<span class="nc" id="L13">	}</span>
+<span class="nc" id="L14">		SpringApplication.run(FrontApplication.class, args);</span>
+<span class="nc" id="L15">	}</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
