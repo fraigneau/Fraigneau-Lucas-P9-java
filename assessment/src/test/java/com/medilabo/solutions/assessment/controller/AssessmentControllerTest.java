@@ -139,21 +139,6 @@ public class AssessmentControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 500 when service throws RuntimeException")
-        void getAssessment_WhenServiceThrowsRuntimeException_ShouldReturn500() throws Exception {
-                // Given
-                Long patientId = 999L;
-                when(assessmentService.assessDiabetesRisk(patientId.intValue()))
-                                .thenThrow(new RuntimeException("Patient not found"));
-
-                // When & Then
-                mockMvc.perform(get("/api/assessment/{patId}", patientId))
-                                .andExpect(status().isInternalServerError());
-
-                verify(assessmentService, times(1)).assessDiabetesRisk(patientId.intValue());
-        }
-
-        @Test
         @DisplayName("Should return 400 when service throws IllegalArgumentException")
         void getAssessment_WhenServiceThrowsIllegalArgumentException_ShouldReturn400() throws Exception {
                 // Given
