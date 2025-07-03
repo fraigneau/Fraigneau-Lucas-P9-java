@@ -18,16 +18,26 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Configuration de sécurité Spring Security avec support JWT.
+ * Security configuration class for the Spring Security framework.
  * 
- * Cette configuration :
- * - Désactive la gestion de session (stateless)
- * - Configure l'authentification JWT
- * - Définit les règles d'autorisation pour les endpoints
- * - Intègre le filtre JWT personnalisé
+ * This class configures the security settings for the web application
+ * including:
+ * - JWT authentication filter integration
+ * - Request authorization rules
+ * - Exception handling for authentication failures
+ * - Logout functionality with JWT cookie management
+ * - Password encoding using BCrypt
+ * - In-memory user details service for development/testing
+ * - Authentication manager configuration
+ * 
+ * The configuration disables CSRF protection as JWT tokens are used for
+ * authentication.
+ * Public endpoints like login, logout, CSS resources, actuator endpoints, and
+ * error pages
+ * are accessible without authentication, while all other requests require
+ * authentication.
  */
 @Configuration
 @EnableWebSecurity
@@ -42,11 +52,11 @@ public class SecurityConfig {
     SecurityContextLogoutHandler securityContextLogoutHandler = new SecurityContextLogoutHandler();
 
     /**
-     * Configuration principale de la chaîne de filtres de sécurité.
+     * Main configuration of the security filter chain.
      * 
-     * @param http l'objet HttpSecurity pour configurer la sécurité
-     * @return SecurityFilterChain la chaîne de filtres configurée
-     * @throws Exception en cas d'erreur de configuration
+     * @param http the HttpSecurity object to configure security
+     * @return SecurityFilterChain the configured filter chain
+     * @throws Exception in case of configuration error
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -81,9 +91,9 @@ public class SecurityConfig {
     }
 
     /**
-     * Encoder de mot de passe BCrypt.
+     * BCrypt password encoder.
      * 
-     * @return PasswordEncoder l'encoder BCrypt configuré
+     * @return PasswordEncoder the configured BCrypt encoder
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -91,11 +101,11 @@ public class SecurityConfig {
     }
 
     /**
-     * Service de détails utilisateur en mémoire pour les tests.
-     * En production, vous devriez remplacer ceci par une implémentation
-     * qui récupère les utilisateurs depuis une base de données.
+     * In-memory user details service for testing.
+     * In production, you should replace this with an implementation
+     * that retrieves users from a database.
      * 
-     * @return UserDetailsService le service de détails utilisateur
+     * @return UserDetailsService the user details service
      */
     @Bean
     public UserDetailsService userDetailsService() {
@@ -109,11 +119,11 @@ public class SecurityConfig {
     }
 
     /**
-     * Gestionnaire d'authentification.
+     * Authentication manager.
      * 
-     * @param authConfig la configuration d'authentification
-     * @return AuthenticationManager le gestionnaire d'authentification
-     * @throws Exception en cas d'erreur de configuration
+     * @param authConfig the authentication configuration
+     * @return AuthenticationManager the authentication manager
+     * @throws Exception in case of configuration error
      */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {

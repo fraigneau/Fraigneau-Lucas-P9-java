@@ -52,11 +52,10 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
         logger.warn("Unauthorized access to {} {} - {}", method, requestURI, authException.getMessage());
 
-        // For AJAX or API requests, return JSON
+        // For API requests, return JSON
         if (isApiRequest(request)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         } else {
-            // For normal requests, redirect to login page
             response.sendRedirect("/login");
         }
     }
