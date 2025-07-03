@@ -145,6 +145,25 @@ DB_PASSWORD=your_password
 DB_URI=mongodb://localhost:27017/medilabosolutions_note
 ```
 
+## 🔐 Sécurité
+
+L'architecture de sécurité repose sur une **double validation JWT** entre le microservice Frontend et le Gateway.
+
+### Flux de sécurité
+1. **Authentification** → Spring Security valide `admin`/`123`
+2. **JWT généré** → Stocké dans cookie HttpOnly par le frontend
+3. **Navigation** → `JwtAuthenticationFilter` valide le cookie à chaque page
+4. **Appel API** → Feign ajoute automatiquement JWT + header `X-Internal-Front`
+5. **Gateway** → Double validation (JWT + header) avant routage
+
+### Mécanismes de protection
+- **Cookie HttpOnly** : Protection XSS
+- **Header X-Internal-Front** : Identification requêtes légitimes
+- **Double validation** : Frontend + Gateway
+- **Clé secrète partagée** : `jwt.secret` commune
+
+![Security Archi](images/security.png)
+
 ## 🌐 Endpoints
 
 ### Gateway (Port 8080)
