@@ -5,7 +5,7 @@ on:
     workflows: ["Microservices Build & Test"]
     types: [completed]
     conclusions: [success]
-    branches: ["main", "dev", "docker/image"]
+    branches: [main, dev, docker/image]
 
 concurrency:
   group: docker-${{ github.ref }}
