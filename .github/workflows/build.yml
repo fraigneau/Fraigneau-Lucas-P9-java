@@ -43,42 +43,40 @@ jobs:
 
       - name: Build JSON matrix
         id: set
+        shell: bash
         run: |
-          # shellcheck disable=SC2086
+          set -euo pipefail
+
           FULL_BUILD=false
 
-          # 1) commit message avec [build-all]
+          # 1) Commit message contains [build-all]
           COMMIT_MSG=$(git log -1 --pretty=%B)
           [[ "$COMMIT_MSG" == *"[build-all]"* ]] && FULL_BUILD=true
 
-          # 2) déclenchement manuel workflow_dispatch avec input
+          # 2) Manual trigger with force_full=true
           if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.force_full }}" == "true" ]]; then
             FULL_BUILD=true
           fi
 
           declare -a services
-
           if $FULL_BUILD; then
             services=(patient note assessment front gateway eureka)
           else
-            [[ "${{ steps.filter.outputs.patient }}"   == 'true' ]] && services+=(patient)
-            [[ "${{ steps.filter.outputs.note }}"      == 'true' ]] && services+=(note)
-            [[ "${{ steps.filter.outputs.assessment }}"== 'true' ]] && services+=(assessment)
-            [[ "${{ steps.filter.outputs.front }}"     == 'true' ]] && services+=(front)
-            [[ "${{ steps.filter.outputs.gateway }}"   == 'true' ]] && services+=(gateway)
-            [[ "${{ steps.filter.outputs.eureka }}"    == 'true' ]] && services+=(eureka)
+            [[ "${{ steps.filter.outputs.patient }}"    == 'true' ]] && services+=(patient)
+            [[ "${{ steps.filter.outputs.note }}"       == 'true' ]] && services+=(note)
+            [[ "${{ steps.filter.outputs.assessment }}" == 'true' ]] && services+=(assessment)
+            [[ "${{ steps.filter.outputs.front }}"      == 'true' ]] && services+=(front)
+            [[ "${{ steps.filter.outputs.gateway }}"    == 'true' ]] && services+=(gateway)
+            [[ "${{ steps.filter.outputs.eureka }}"     == 'true' ]] && services+=(eureka)
           fi
 
-          # Construction du JSON ["patient","note",...]
-          list=""
-          for s in "${services[@]}"; do
-            if [ -z "$list" ]; then
-              list="\"$s\""
-            else
-              list+=" , \"$s\""
-            fi
-          done
-          json="[${list}]"
+          # Build a valid JSON array of quoted service names
+          if [ ${#services[@]} -eq 0 ]; then
+            json="[]"
+          else
+            joined=$(printf ',"%s"' "${services[@]}")
+            json="[${joined:1}]"
+          fi
 
           echo "Services to build: $json"
           echo "services=$json" >> $GITHUB_OUTPUT
@@ -105,7 +103,7 @@ jobs:
           distribution: temurin
           cache: maven
 
-      - name: Cache local Maven repo
+      - name: Cache Maven repository
         uses: actions/cache@v3
         with:
           path: ~/.m2
@@ -114,10 +112,9 @@ jobs:
             ${{ runner.os }}-m2-${{ matrix.service }}-
             ${{ runner.os }}-m2-
 
-      - name: Build & test ${{ matrix.service }}
+      - name: Build & Test ${{ matrix.service }}
         working-directory: ./${{ matrix.service }}
-        run: |
-          mvn -B clean package test jacoco:report javadoc:javadoc surefire-report:report
+        run: mvn -B clean package test jacoco:report javadoc:javadoc surefire-report:report
 
       - name: Upload reports (always)
         if: always()
@@ -136,7 +133,7 @@ jobs:
       - name: Append to build summary
         if: always()
         run: |
-          ICON="❌"; [ "${{ job.status }}" = "success" ] && ICON="✅"
+          ICON="❌"; [[ "${{ job.status }}" == "success" ]] && ICON="✅"
           echo "${ICON} **${{ matrix.service }}** – ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
 
   build-summary:
