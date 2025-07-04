@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.medilabo.solutions.gateway"},{"l":"com.medilabo.solutions.gateway.config"},{"l":"com.medilabo.solutions.gateway.util"}];updateSearchResults();
