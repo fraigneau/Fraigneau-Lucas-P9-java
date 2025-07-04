@@ -1,6 +1,5 @@
 package com.medilabo.solutions.front.controller;
 
-import org.apache.catalina.webresources.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,16 +51,16 @@ public class HomeController {
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
 
-        // // Affichage du contenu du cache
-        // if (cacheManager != null) {
-        // org.springframework.cache.Cache cache = cacheManager.getCache("patient");
-        // if (cache != null) {
-        // logger.debug("Cache 'patient' est présent: {}", cache.getName());
-        // logger.debug("Cache native store: {}", cache.getNativeCache());
-        // } else {
-        // logger.debug("Cache 'patient' non trouvé");
-        // }
-        // }
+        // Affichage du contenu du cache
+        if (cacheManager != null) {
+            org.springframework.cache.Cache cache = cacheManager.getCache("patient");
+            if (cache != null) {
+                logger.debug("Cache 'patient' est présent: {}", cache.getName());
+                logger.debug("Cache native store: {}", cache.getNativeCache());
+            } else {
+                logger.debug("Cache 'patient' non trouvé");
+            }
+        }
 
         try {
             PatientPageDto patientPageDto = gatewayServiceClient.getAllPatients(page, size, sortBy, sortDir);
