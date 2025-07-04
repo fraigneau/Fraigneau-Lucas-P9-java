@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtValidationFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">gateway</a> &gt; <a href="index.source.html" class="el_package">com.medilabo.solutions.gateway.config</a> &gt; <span class="el_source">JwtValidationFilter.java</span></div><h1>JwtValidationFilter.java</h1><pre class="source lang-java linenums">package com.medilabo.solutions.gateway.config;
+
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+
+import com.medilabo.solutions.gateway.util.JwtValidatorUtil;
+
+import reactor.core.publisher.Mono;
+
+/**
+ * Reactive WebFilter that intercepts incoming HTTP requests to validate JWT
+ * tokens.
+ * 
+ * &lt;p&gt;
+ * This filter performs the following tasks:
+ * &lt;ul&gt;
+ * &lt;li&gt;Extracts the JWT token from the &quot;jwt&quot; cookie&lt;/li&gt;
+ * &lt;li&gt;Validates the token using {@link JwtValidatorUtil}&lt;/li&gt;
+ * &lt;li&gt;Checks that the request originates from the frontend using a custom
+ * header&lt;/li&gt;
+ * &lt;li&gt;If valid, sets the security context with a {@code ROLE_USER}&lt;/li&gt;
+ * &lt;li&gt;If invalid, redirects the user to the login page&lt;/li&gt;
+ * &lt;/ul&gt;
+ * &lt;/p&gt;
+ * 
+ * &lt;p&gt;
+ * This filter is typically added before the authentication step in the Spring
+ * Security filter chain.
+ * &lt;/p&gt;
+ */
+@Component
+<span class="nc" id="L46">public class JwtValidationFilter implements WebFilter {</span>
+
+<span class="nc" id="L48">    private static final Logger log = LoggerFactory.getLogger(JwtValidationFilter.class);</span>
+
+    private static final String INTERNAL_HEADER = &quot;X-Internal-Front&quot;;
+
+    @Autowired
+    private JwtValidatorUtil jwtValidator;
+
+    /**
+     * Main filter logic that processes incoming requests.
+     *
+     * @param exchange the current {@link ServerWebExchange}
+     * @param chain    the {@link WebFilterChain} to delegate to the next filter
+     * @return a {@link Mono} that completes when the filter chain has been
+     *         processed
+     */
+    @Override
+    public Mono&lt;Void&gt; filter(ServerWebExchange exchange, WebFilterChain chain) {
+
+<span class="nc" id="L66">        ServerHttpRequest req = exchange.getRequest();</span>
+<span class="nc" id="L67">        String path = req.getURI().getPath();</span>
+
+<span class="nc" id="L69">        String jwt = extractJwtFromCookies(req);</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        if (jwt != null) {</span>
+
+<span class="nc bnc" id="L72" title="All 4 branches missed.">            if (jwtValidator.isValid(jwt) &amp;&amp; isFromFront(req)) {</span>
+<span class="nc" id="L73">                log.info(&quot;Valid JWT signature for request: {}&quot;, path);</span>
+
+<span class="nc" id="L75">                String username = jwtValidator.extractClaim(jwt, &quot;sub&quot;);</span>
+
+<span class="nc" id="L77">                var auth = new UsernamePasswordAuthenticationToken(</span>
+                        username,
+                        null,
+<span class="nc" id="L80">                        List.of(new SimpleGrantedAuthority(&quot;ROLE_USER&quot;)));</span>
+
+<span class="nc" id="L82">                var ctx = new SecurityContextImpl(auth);</span>
+
+<span class="nc" id="L84">                return chain.filter(exchange)</span>
+<span class="nc" id="L85">                        .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(ctx)));</span>
+            }
+
+<span class="nc" id="L88">            log.warn(&quot;Invalid JWT signature for request: {}&quot;, path);</span>
+<span class="nc" id="L89">            return redirect(exchange, &quot;http://localhost:8084/login&quot;);</span>
+        }
+
+<span class="nc" id="L92">        log.warn(&quot;No JWT token found in cookies for request: {}&quot;, path);</span>
+<span class="nc" id="L93">        return chain.filter(exchange);</span>
+    }
+
+    /**
+     * Extracts the JWT token from cookies.
+     *
+     * @param req the current {@link ServerHttpRequest}
+     * @return the JWT token string if present, or {@code null} if not found
+     */
+    private String extractJwtFromCookies(ServerHttpRequest req) {
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        return req.getCookies().getFirst(&quot;jwt&quot;) != null</span>
+<span class="nc" id="L104">                ? req.getCookies().getFirst(&quot;jwt&quot;).getValue()</span>
+<span class="nc" id="L105">                : null;</span>
+    }
+
+    /**
+     * Verifies whether the request originated from the frontend.
+     *
+     * @param req the current {@link ServerHttpRequest}
+     * @return {@code true} if the internal header is present, {@code false}
+     *         otherwise
+     */
+    private boolean isFromFront(ServerHttpRequest req) {
+<span class="nc" id="L116">        return req.getHeaders().containsKey(INTERNAL_HEADER);</span>
+    }
+
+    /**
+     * Redirects the user to a specified URL using HTTP 303 SEE_OTHER.
+     *
+     * @param exchange the current {@link ServerWebExchange}
+     * @param url      the target URL to redirect to
+     * @return a {@link Mono} that completes when the response is finished
+     */
+    private Mono&lt;Void&gt; redirect(ServerWebExchange exchange, String url) {
+<span class="nc" id="L127">        exchange.getResponse().setStatusCode(HttpStatus.SEE_OTHER);</span>
+<span class="nc" id="L128">        exchange.getResponse().getHeaders().set(HttpHeaders.LOCATION, url);</span>
+<span class="nc" id="L129">        return exchange.getResponse().setComplete();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
