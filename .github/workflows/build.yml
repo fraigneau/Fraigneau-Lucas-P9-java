@@ -3,12 +3,19 @@ name: Microservices Build & Test
 on:
   push:
     branches:
-      - "feat/*"
-      - "test/*"
+      - 'feat/*'
+      - 'test/*'
       - dev
-      - "docker/*"
+      - 'docker/*'
   pull_request:
     branches: [main, dev]
+  workflow_dispatch:
+    inputs:
+      force_full:
+        description: 'Build & test all services (override change detection)'
+        required: false
+        default: 'false'
+        type: boolean
 
 concurrency:
   group: build-${{ github.ref }}
@@ -37,34 +44,64 @@ jobs:
       - name: Build JSON matrix
         id: set
         run: |
-          services=()
-          if [ "${{ steps.filter.outputs.patient }}"   = "true" ]; then services+=("\"patient\""); fi
-          if [ "${{ steps.filter.outputs.note }}"      = "true" ]; then services+=("\"note\""); fi
-          if [ "${{ steps.filter.outputs.assessment }}"= "true" ]; then services+=("\"assessment\""); fi
-          if [ "${{ steps.filter.outputs.front }}"     = "true" ]; then services+=("\"front\""); fi
-          if [ "${{ steps.filter.outputs.gateway }}"   = "true" ]; then services+=("\"gateway\""); fi
-          if [ "${{ steps.filter.outputs.eureka }}"    = "true" ]; then services+=("\"eureka\""); fi
-          json="[${services[*]}]"
+          # shellcheck disable=SC2086
+          FULL_BUILD=false
+
+          # 1) commit message avec [build-all]
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          [[ "$COMMIT_MSG" == *"[build-all]"* ]] && FULL_BUILD=true
+
+          # 2) déclenchement manuel workflow_dispatch avec input
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.force_full }}" == "true" ]]; then
+            FULL_BUILD=true
+          fi
+
+          declare -a services
+
+          if $FULL_BUILD; then
+            services=(patient note assessment front gateway eureka)
+          else
+            [[ "${{ steps.filter.outputs.patient }}"   == 'true' ]] && services+=(patient)
+            [[ "${{ steps.filter.outputs.note }}"      == 'true' ]] && services+=(note)
+            [[ "${{ steps.filter.outputs.assessment }}"== 'true' ]] && services+=(assessment)
+            [[ "${{ steps.filter.outputs.front }}"     == 'true' ]] && services+=(front)
+            [[ "${{ steps.filter.outputs.gateway }}"   == 'true' ]] && services+=(gateway)
+            [[ "${{ steps.filter.outputs.eureka }}"    == 'true' ]] && services+=(eureka)
+          fi
+
+          # Construction du JSON ["patient","note",...]
+          list=""
+          for s in "${services[@]}"; do
+            if [ -z "$list" ]; then
+              list="\"$s\""
+            else
+              list+=" , \"$s\""
+            fi
+          done
+          json="[${list}]"
+
           echo "Services to build: $json"
           echo "services=$json" >> $GITHUB_OUTPUT
 
   build-test:
     needs: detect-changes
-    if: ${{ fromJson(needs.detect-changes.outputs.services) != '' }} # skip si rien à faire
+    if: ${{ needs.detect-changes.outputs.services != '[]' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         service: ${{ fromJson(needs.detect-changes.outputs.services) }}
+
     env:
       MAVEN_OPTS: -Dmaven.test.failure.ignore=false
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: "21"
+          java-version: '21'
           distribution: temurin
           cache: maven
 
@@ -100,4 +137,20 @@ jobs:
         if: always()
         run: |
           ICON="❌"; [ "${{ job.status }}" = "success" ] && ICON="✅"
-          echo "${ICON} **${{ matrix.service }}** – ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "${ICON} **${{ matrix.service }}** – ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+
+  build-summary:
+    needs: build-test
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Final status
+        run: |
+          if [ "${{ needs.build-test.result }}" = "success" ]; then
+            echo "🎉 **All builds succeeded**" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.build-test.result }}" = "skipped" ]; then
+            echo "⚠️ **No service required building (skipped)**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "🚨 **Some builds failed – see above for details**" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
