@@ -2,7 +2,7 @@ name: Microservices Build & Test
 
 on:
   push:
-    branches: ["feat/*", "test/*", "dev"]
+    branches: ["feat/*", "test/*", "dev", "docker/*"]
   pull_request:
     branches: ["main", "dev"]
 
