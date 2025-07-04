@@ -1,0 +1,43 @@
+name: CI/CD Pipeline - Medilabo Solutions
+
+on:
+  workflow_run:
+    workflows: ["Microservices Build & Test"]
+    types: [completed]
+    conclusions: [success] # ← filtre
+    branches: ["main", "dev"]
+
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker-build-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [eureka, patient, note, assessment, gateway, front]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          name: ${{ matrix.service }}-jar
+          path: ${{ matrix.service }}/target/
+
+      - name: Ensure JAR present
+        run: |
+          ls ${{ matrix.service }}/target/*.jar >/dev/null || { echo "JAR missing"; exit 1; }
+
+      - uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.service }}
+          file: ${{ matrix.service }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
