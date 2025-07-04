@@ -4,8 +4,8 @@ on:
   workflow_run:
     workflows: ["Microservices Build & Test"]
     types: [completed]
-    conclusions: [success] # ← filtre
-    branches: ["main", "dev"]
+    conclusions: [success]
+    branches: ["main", "dev", "docker/*"]
 
 concurrency:
   group: docker-${{ github.ref }}
