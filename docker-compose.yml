@@ -17,9 +17,9 @@ services:
       - mysql-data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 15s
+      timeout: 10s
+      retries: 10
     networks:
       - medilabosolutions-net
 
@@ -33,9 +33,9 @@ services:
       - mongo-data:/data/db
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 15s
+      timeout: 10s
+      retries: 10
     networks:
       - medilabosolutions-net
 
@@ -43,18 +43,20 @@ services:
     image: ${REGISTRY}/${IMAGE_OWNER}/medilabo-eureka:${TAG:-latest}
     ports:
       - "8761:8761"
-    healthcheck:
-      test: ["CMD", "true"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - medilabosolutions-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
 
   patient:
     image: ${REGISTRY}/${IMAGE_OWNER}/medilabo-patient:${TAG:-latest}
     ports:
       - "8081:8081"
+    networks:
+      - medilabosolutions-net
     environment:
       DB_URL: jdbc:mysql://mysql:3306/medilabosolutions_patient
       DB_USERNAME: ${MYSQL_USER}
@@ -66,17 +68,17 @@ services:
       eureka:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "true"] #["CMD", "curl", "-f", "http://localhost:8100/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - medilabosolutions-net
+      test: ["CMD", "curl", "-f", "http://patient:8100/actuator/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
 
   note:
     image: ${REGISTRY}/${IMAGE_OWNER}/medilabo-note:${TAG:-latest}
     ports:
       - "8082:8082"
+    networks:
+      - medilabosolutions-net
     environment:
       DB_URI: mongodb://${MONGO_ROOT}:${MONGO_PASS}@mongo:27017/medilabosolutions_note?authSource=admin
       EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:8761/eureka/
@@ -87,34 +89,34 @@ services:
       eureka:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "true"] # ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - medilabosolutions-net
+      test: ["CMD", "curl", "-f", "http://note:8090/actuator/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
 
   assessment:
     image: ${REGISTRY}/${IMAGE_OWNER}/medilabo-assessment:${TAG:-latest}
     ports:
       - "8083:8083"
+    networks:
+      - medilabosolutions-net
     environment:
       EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:8761/eureka/
     depends_on:
       eureka:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "true"] # ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - medilabosolutions-net
+      test: ["CMD", "curl", "-f", "http://assessment:8080/actuator/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
 
   gateway:
     image: ${REGISTRY}/${IMAGE_OWNER}/medilabo-gateway:${TAG:-latest}
     ports:
       - "8080:8080"
+    networks:
+      - medilabosolutions-net
     environment:
       EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:8761/eureka/
       JWT_SECRET: ${JWT_SECRET}
@@ -128,28 +130,26 @@ services:
       eureka:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "true"] # ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - medilabosolutions-net
+      test: ["CMD", "curl", "-f", "http://gateway:8080/actuator/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
 
   front:
     image: ${REGISTRY}/${IMAGE_OWNER}/medilabo-front:${TAG:-latest}
     ports:
       - "8084:8084"
+    networks:
+      - medilabosolutions-net
     environment:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: "${JWT_EXPIRATION:-86400000}"
-      GATEWAY_URL: http://gateway:8080
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:8761/eureka/
     depends_on:
       gateway:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "true"] # ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - medilabosolutions-net
+      test: ["CMD", "curl", "-f", "http://front:8084/actuator/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
