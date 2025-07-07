@@ -58,6 +58,24 @@ jobs:
             FULL_BUILD=true
           fi
 
+          # 3) If no changes detected, set services to empty array
+          if [[ "${{ steps.filter.outputs.patient }}" == 'false' && \
+                "${{ steps.filter.outputs.note }}" == 'false' && \
+                "${{ steps.filter.outputs.assessment }}" == 'false' && \
+                "${{ steps.filter.outputs.front }}" == 'false' && \
+                "${{ steps.filter.outputs.gateway }}" == 'false' && \
+                "${{ steps.filter.outputs.eureka }}" == 'false' ]]; then
+            echo "No changes detected, skipping build."
+            echo "services=[]" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # 4) If PR FULL_BUILD
+          # If this is a pull request, force full build
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            FULL_BUILD=true
+          fi
+
           declare -a services
           if $FULL_BUILD; then
             services=(patient note assessment front gateway eureka)
