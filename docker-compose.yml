@@ -53,8 +53,6 @@ services:
 
   patient:
     image: ${REGISTRY}/${IMAGE_OWNER}/medilabo-patient:${TAG:-latest}
-    ports:
-      - "8081:8081"
     networks:
       - medilabosolutions-net
     environment:
@@ -68,15 +66,13 @@ services:
       eureka:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://patient:8100/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
       interval: 15s
       timeout: 10s
       retries: 10
 
   note:
     image: ${REGISTRY}/${IMAGE_OWNER}/medilabo-note:${TAG:-latest}
-    ports:
-      - "8082:8082"
     networks:
       - medilabosolutions-net
     environment:
@@ -89,15 +85,13 @@ services:
       eureka:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://note:8090/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
       interval: 15s
       timeout: 10s
       retries: 10
 
   assessment:
     image: ${REGISTRY}/${IMAGE_OWNER}/medilabo-assessment:${TAG:-latest}
-    ports:
-      - "8083:8083"
     networks:
       - medilabosolutions-net
     environment:
@@ -106,7 +100,7 @@ services:
       eureka:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://assessment:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
       interval: 15s
       timeout: 10s
       retries: 10
@@ -130,7 +124,7 @@ services:
       eureka:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://gateway:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 20s
       timeout: 10s
       retries: 10
@@ -149,7 +143,7 @@ services:
       gateway:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://front:8084/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
       interval: 20s
       timeout: 10s
       retries: 10
