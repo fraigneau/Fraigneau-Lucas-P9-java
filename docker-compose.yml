@@ -1,0 +1,149 @@
+networks:
+  medilabosolutions-net:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  mongo-data:
+
+services:
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: rootroot
+      MYSQL_DATABASE: medilabosolutions_patient
+    volumes:
+      - ./patient/data:/docker-entrypoint-initdb.d:ro
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    networks:
+      - medilabosolutions-net
+
+  mongo:
+    image: mongo:6
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
+    volumes:
+      - ./note/data:/docker-entrypoint-initdb.d:ro
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    networks:
+      - medilabosolutions-net
+
+  eureka:
+    image: ${REGISTRY}/${IMAGE_OWNER}/medilabo-eureka:${TAG:-latest}
+    ports:
+      - "8761:8761"
+    networks:
+      - medilabosolutions-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+
+  patient:
+    image: ${REGISTRY}/${IMAGE_OWNER}/medilabo-patient:${TAG:-latest}
+    networks:
+      - medilabosolutions-net
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/medilabosolutions_patient
+      DB_USERNAME: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:8761/eureka/
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  note:
+    image: ${REGISTRY}/${IMAGE_OWNER}/medilabo-note:${TAG:-latest}
+    networks:
+      - medilabosolutions-net
+    environment:
+      DB_URI: mongodb://${MONGO_ROOT}:${MONGO_PASS}@mongo:27017/medilabosolutions_note?authSource=admin
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:8761/eureka/
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  assessment:
+    image: ${REGISTRY}/${IMAGE_OWNER}/medilabo-assessment:${TAG:-latest}
+    networks:
+      - medilabosolutions-net
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:8761/eureka/
+    depends_on:
+      eureka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  gateway:
+    image: ${REGISTRY}/${IMAGE_OWNER}/medilabo-gateway:${TAG:-latest}
+    ports:
+      - "8080:8080"
+    networks:
+      - medilabosolutions-net
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:8761/eureka/
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      assessment:
+        condition: service_healthy
+      patient:
+        condition: service_healthy
+      note:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+
+  front:
+    image: ${REGISTRY}/${IMAGE_OWNER}/medilabo-front:${TAG:-latest}
+    ports:
+      - "8084:8084"
+    networks:
+      - medilabosolutions-net
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: "${JWT_EXPIRATION:-86400000}"
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:8761/eureka/
+    depends_on:
+      gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 10

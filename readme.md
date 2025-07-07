@@ -4,6 +4,7 @@
 ![Maven](https://img.shields.io/badge/Maven-3.9.10-blue?style=flat-square&logo=apache-maven)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0+-blue?style=flat-square&logo=mysql)
 ![MongoDB](https://img.shields.io/badge/MongoDB-4.4+-green?style=flat-square&logo=mongodb)
+![Docker Ready](https://img.shields.io/badge/Docker-Ready-blue?style=flat-square&logo=docker)
 
 ## 📋 Description
 
@@ -116,7 +117,6 @@ CREATE DATABASE medilabosolutions_patient;
 
 #### MongoDB (Service Note)
 ```bash
-# Créer la base de données
 use medilabosolutions_note;
 ```
 
@@ -191,8 +191,10 @@ Le projet utilise GitHub Actions pour l'intégration continue avec deux workflow
 - **Validation des tests** : Exécution automatique des tests unitaires sur les branches de développement
 - **Déploiement de la documentation** : Publication automatique des rapports JaCoCo, Surefire et Javadoc sur GitHub Pages
 
+![Workflow Build](images/gitflow_build.png)
+![Workflow GitHub Pages](images/gitflow_gh-pages.png)
 ![Workflow Tests](images/gitflow_test.png)
-![Workflow GitHub Pages](images/gitflow_gh-pages.png)## 📚 Documentation
+![Workflow Build](images/gitflow_docker.png)
 
 
 ## 📝 API Documentation
@@ -230,6 +232,100 @@ Cette séquence garantit que chaque service peut s'enregistrer correctement aupr
 - Note : 8082
 - Assessment : 8083
 - Front : 8084
+
+# 🐳 Déploiement avec Docker Compose
+
+Cette section décrit l'architecture et le déploiement de l'application MedilaboSolutions utilisant Docker Compose.
+
+## 🌐 Réseau et Communication
+
+Tous les services communiquent via un **réseau Docker bridge** dédié (`medilabosolutions-net`), permettant :
+- Communication inter-services par nom de service
+- Isolation du trafic réseau
+- Résolution DNS automatique
+
+## 🔧 Configuration
+
+### Variables d'environnement requises
+
+Créez un fichier `.env` à la racine du projet avec les variables suivantes :
+
+```env
+# Registry Docker
+REGISTRY=docker.io
+IMAGE_OWNER=votre-username-docker
+TAG=latest
+
+# Base de données MySQL
+MYSQL_USER=medilabo_user
+MYSQL_PASSWORD=votre-mot-de-passe
+
+# Base de données MongoDB
+MONGO_ROOT=admin
+MONGO_PASS=votre-mot-de-passe-mongo
+
+# Sécurité JWT
+JWT_SECRET=votre-clé-secrète-jwt
+JWT_EXPIRATION=86400000
+```
+
+### Volumes persistants
+
+Les données sont persistées via des volumes Docker :
+- `mysql-data` - Données MySQL
+- `mongo-data` - Données MongoDB
+
+## 🚀 Démarrage
+
+### Prérequis
+- Docker Engine 20.10+
+- Docker Compose v2+
+- Fichier `.env` configuré
+
+### Commandes
+
+```bash
+docker compose up -d
+
+docker compose ps
+
+docker compose logs -f [service-name]
+
+docker compose down
+```
+
+## 🔍 Health Checks
+
+Chaque service inclut des **health checks automatiques** :
+- **Intervalles** : 15-20 secondes
+- **Timeout** : 10 secondes  
+- **Retry** : 10 tentatives
+- **Endpoints** : `/actuator/health` pour les services Spring Boot
+
+## 📋 Ordre de démarrage
+
+Les services démarrent dans l'ordre suivant grâce aux dépendances :
+
+1. **MySQL** & **MongoDB** (bases de données)
+2. **Eureka Server** (service registry)
+3. **Patient**, **Note**, **Assessment** (services métier)
+4. **Gateway** (API Gateway)
+5. **Front-end** (interface utilisateur)
+
+## 🌍 Accès aux services
+
+Une fois déployé, l'application est accessible via :
+
+- **Interface utilisateur** : http://localhost:8084
+- **API Gateway** : http://localhost:8080
+- **Eureka Dashboard** : http://localhost:8761
+
+## ⚠️ Notes importantes
+
+- Les **health checks** garantissent que les services dépendants attendent leur disponibilité
+- Les **données initiales** sont chargées automatiquement depuis `./patient/data` et `./note/data`
+- La **configuration Eureka** permet la découverte automatique des services
+- Le **JWT** est partagé entre les services pour l'authentification
 
 ## 👥 Auteur
 
