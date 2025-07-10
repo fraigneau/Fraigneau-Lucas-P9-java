@@ -286,12 +286,6 @@ Les données sont persistées via des volumes Docker :
 
 ```bash
 docker compose up -d
-
-docker compose ps
-
-docker compose logs -f [service-name]
-
-docker compose down
 ```
 
 ## 🔍 Health Checks
@@ -326,6 +320,14 @@ Une fois déployé, l'application est accessible via :
 - Les **données initiales** sont chargées automatiquement depuis `./patient/data` et `./note/data`
 - La **configuration Eureka** permet la découverte automatique des services
 - Le **JWT** est partagé entre les services pour l'authentification
+
+## 🌱 Évolutions Green Code possibles
+
+- Optimisation des ressources
+- Mise en cache intelligente : Réduire les appels base de données
+- Compression des données : Diminuer la bande passante utilisée
+- Images Docker multi-stage : Réduire l'empreinte stockage
+- Pooling de connexions : Éviter la création/destruction répétée
 
 ## 👥 Auteur
 
