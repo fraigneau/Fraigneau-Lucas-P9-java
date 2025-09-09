@@ -145,6 +145,28 @@ DB_PASSWORD=your_password
 DB_URI=mongodb://localhost:27017/medilabosolutions_note
 ```
 
+## 📐 Respect de la norme 3NF
+
+L’architecture des bases de données de **Medilabo Solutions** a été conçue pour respecter la **Troisième Forme Normale (3NF)**, garantissant la cohérence, l’intégrité et l’absence de redondance inutile.
+
+### Service Patient (MySQL)
+
+La table `patients` contient exclusivement les informations personnelles et administratives des patients :
+
+* **Clé primaire** : `id`
+* **Attributs** : `firstname`, `lastname`, `birth_date`, `gender`, `address`, `phone_number`, `created_at`, `updated_at`
+
+Chaque attribut dépend directement et uniquement de la clé primaire (`id`), ce qui élimine les dépendances partielles ou transitives. Par exemple, l’adresse ou le numéro de téléphone ne sont liés qu’à un patient unique, sans duplication dans la base.
+
+### Service Note (MongoDB)
+
+Les notes médicales sont stockées dans une collection distincte `notes` :
+
+* **Clé de référence** : `patId` (correspondant à `patients.id`)
+* **Attributs** : `patId`, `note` (+ métadonnées éventuelles)
+
+Cette séparation entre **données relationnelles** (patients) et **données non relationnelles** (notes médicales) respecte le principe *Database per Service*. Les informations du patient ne sont pas répliquées dans les notes : seule l’identification via `patId` est conservée, garantissant une base normalisée et cohérente.
+
 ## 🔐 Sécurité
 
 L'architecture de sécurité repose sur une **double validation JWT** entre le microservice Frontend et le Gateway.
@@ -321,13 +343,48 @@ Une fois déployé, l'application est accessible via :
 - La **configuration Eureka** permet la découverte automatique des services
 - Le **JWT** est partagé entre les services pour l'authentification
 
-## 🌱 Évolutions Green Code possibles
+## 🌱 Green Code
 
-- Optimisation des ressources
-- Mise en cache intelligente : Réduire les appels base de données
-- Compression des données : Diminuer la bande passante utilisée
-- Images Docker multi-stage : Réduire l'empreinte stockage
-- Pooling de connexions : Éviter la création/destruction répétée
+### Optimisations déjà réalisées
+
+* **Pagination des patients**
+  Les appels à l’API Patient renvoient uniquement un nombre limité d’éléments par page.
+  → Réduit la charge sur la base MySQL, évite les transferts de grandes listes, améliore la réactivité.
+
+* **Caching des données fréquentes**
+  Les ressources les plus consultées (patients, résultats d’évaluation) sont mises en cache côté service.
+  → Diminue les appels répétés aux bases de données et limite l’utilisation CPU/IO.
+
+* **DTO adaptés**
+  Les objets renvoyés par l’API sont allégés pour ne contenir que les champs nécessaires (ex. liste vs détail).
+  → Moins de données transférées, réponses JSON plus légères.
+
+**Bénéfices :**
+
+* Économie de bande passante
+* Moins de calculs et d’accès disque
+* Expérience utilisateur plus fluide
+
+### Évolutions possibles
+
+* **Indexes optimisés**
+
+  * *MySQL Patient* : index sur les colonnes de tri/filtre (ex. `lastName, firstName, id`).
+  * *Mongo Note* : index sur `patId` (+ date si tri).
+    → Réponses plus rapides, moins d’IO disque.
+
+* **Images Docker plus légères**
+  Construire avec multi-stage et JRE minimal.
+  → Moins de RAM et CPU consommés au démarrage.
+
+* **Cache client statique (Front)**
+  Mettre un Cache-Control: immutable sur les fichiers CSS/JS/images.
+  → Chargés une seule fois par le navigateur.
+
+* **Compression HTTP au niveau du Gateway**
+  Activer GZIP/Brotli pour toutes les réponses JSON/HTML.
+  → Diminution immédiate de la bande passante consommée.
+
 
 ## 👥 Auteur
 
